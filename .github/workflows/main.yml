@@ -35,7 +35,7 @@ jobs:
 
     - name: Test with pytest
       run: |
-        poetry run pytest --cov=./new_project --cov-report=xml
+        poetry run pytest --cov=./lgsm --cov-report=xml
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
@@ -48,4 +48,4 @@ jobs:
 
     - name: Lint with pylint
       run: |
-        poetry run pylint new_project
+        poetry run pylint lgsm

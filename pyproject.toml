@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "new-project"
+name = "LGSM"
 version = "0.1.0"
-description = "Short project description."
+description = "Latent Galaxy SED Model"
 authors = ["John Franklin Crenshaw <jfcrenshaw@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/jfcrenshaw/new-project"
-repository = "https://github.com/jfcrenshaw/new-project"
+homepage = "https://github.com/jfcrenshaw/lgsm"
+repository = "https://github.com/jfcrenshaw/lgsm"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
