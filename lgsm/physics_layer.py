@@ -1,3 +1,6 @@
+"""
+Module that translates a latent SED to observed photometry.
+"""
 from typing import Sequence
 
 import elegy
@@ -7,11 +10,12 @@ import sncosmo
 from jax import vmap
 from sncosmo.constants import HC_ERG_AA
 
-from .utils import mag_to_flambda
+from .sed_utils import mag_to_flambda
 
 
 class PhysicsLayer(elegy.Module):
     """A physics layer that calculates photometry from an SED in AB magnitude.
+
     1. Calculating fluxes from F_lambda
     CCDs are photon counters, so we must convert from energy (ergs) to photon
     counts. We can do this via dividing by the energy/photon:
@@ -20,6 +24,7 @@ class PhysicsLayer(elegy.Module):
     dimensionless filter response function, T(lambda):
     flux = 1/hc * Integral[dlambda lambda T(lambda) F_lambda(lambda)].
     The units of this flux are photon/s/cm^2.
+
     2. Converting this flux back to an AB magnitude.
     We need to divide this flux by the flux of an object with magnitude zero
     in the corresponding band (i.e. the integrated flux of the 3631 Jy SED
@@ -94,17 +99,17 @@ class PhysicsLayer(elegy.Module):
         for band in self.bandpasses:
 
             # get the integrated zero point flux for the band
-            zp = sncosmo.get_magsystem("ab").zpbandflux(band)
+            zero_point = sncosmo.get_magsystem("ab").zpbandflux(band)
 
             # get the filter response function
-            T = sncosmo.get_bandpass(band)(band_wave)
+            response = sncosmo.get_bandpass(band)(band_wave)
 
             # note we don't have to worry about normalizing the response
-            # function T, because the same normalization appears in zp,
-            # which cancels when we divide by zp.
+            # function because the same normalization appears in zero_point,
+            # which cancels when we divide by zero_point.
 
             # calculate the weights needed for flux integration
-            weights = norm / zp * T * band_wave * band_dwave
+            weights = norm / zero_point * response * band_wave * band_dwave
 
             # convolve the weights so that every point in conv_weights is
             # the sum of the adjacent N=oversampling elements in weights.

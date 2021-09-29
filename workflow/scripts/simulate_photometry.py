@@ -1,9 +1,11 @@
-from lgsm.physicsLayer import PhysicsLayer
+"""
+Calculates simulated photometry for the provided SEDs at a variety of
+redshifts and magnitudes.
+"""
 import pickle
 
 import jax.numpy as jnp
 from jax import random
-
 from lgsm import PhysicsLayer
 
 
