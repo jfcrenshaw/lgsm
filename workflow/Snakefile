@@ -1,1 +1,10 @@
 configfile: "config/default_config.yaml"
+
+
+rule simulate_photometry:
+    input:
+        "data/raw/simulated_seds.pkl",
+    output:
+        "data/processed/simulated_photometry.pkl",
+    script:
+        "scripts/simulate_photometry.py"

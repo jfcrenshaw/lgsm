@@ -1,0 +1,8 @@
+sims:
+  random_seed: 0
+  redshifts_per_sed: 100
+  min_redshift: 0.01
+  max_redshift: 2
+  min_mag: 18
+  max_mag: 22
+  bandpasses: ["lsstu", "lsstg", "lsstr", "lssti", "lsstz", "lssty"]
