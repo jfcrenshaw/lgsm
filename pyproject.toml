@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "new-project"
+version = "0.1.0"
+description = "Short project description."
+authors = ["John Franklin Crenshaw <jfcrenshaw@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/jfcrenshaw/new-project"
+repository = "https://github.com/jfcrenshaw/new-project"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",   
+]
+include = ["LICENSE"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+jupyter = "^1.0.0"
+jupyterlab = "^3.1.14"
+snakemake = "^6.8.1"
+
+[tool.poetry.dev-dependencies]
+black = "^21.9b0"
+pylint = "^2.11.1"
+pytest = "^5.2"
+pytest-cov = "^2.12.1"
+snakefmt = "^0.4.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
