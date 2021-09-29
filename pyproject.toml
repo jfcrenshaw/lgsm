@@ -17,10 +17,14 @@ classifiers = [
 include = ["LICENSE"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = ">=3.7.1,<3.9"
 jupyter = "^1.0.0"
 jupyterlab = "^3.1.14"
 snakemake = "^6.8.1"
+numpy = "^1.21.2"
+pandas = "^1.3.3"
+jax = "^0.2.21"
+elegy = "^0.7.4"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
