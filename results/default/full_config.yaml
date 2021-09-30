@@ -1,0 +1,45 @@
+decoder:
+  batch_norm: true
+  layers:
+  - 8
+  - 16
+  - 32
+  normalize_at: 4000.0
+  sed_unit: mag
+encoder:
+  batch_norm: true
+  intrinsic_latent_size: 3
+  layers:
+  - 32
+physics_layer:
+  bandpasses:
+  - lsstu
+  - lsstg
+  - lsstr
+  - lssti
+  - lsstz
+  - lssty
+run_name: default
+sed:
+  wave_bins: 64
+  wave_max: 11000.0
+  wave_min: 1000.0
+sims:
+  bandpasses:
+  - lsstu
+  - lsstg
+  - lsstr
+  - lssti
+  - lsstz
+  - lssty
+  max_mag: 22.0
+  max_redshift: 2.0
+  min_mag: 18.0
+  min_redshift: 0.01
+  random_seed: 0
+  redshifts_per_sed: 100
+training:
+  batch_size: 128
+  epochs: 100
+  eta: 0.01
+  learning_rate: 0.001

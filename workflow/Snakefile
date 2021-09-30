@@ -1,6 +1,24 @@
 configfile: "config/default_config.yaml"
 
 
+# directory where to store all the results
+# EXCEPT for data that may be shared between many runs
+results_dir = "results/" + config["run_name"] + "/"
+
+
+rule all:
+    input:
+        results_dir + "full_config.yaml",
+        "data/processed/simulated_photometry.pkl",
+
+
+rule save_config:
+    output:
+        results_dir + "full_config.yaml",
+    script:
+        "scripts/save_config.py"
+
+
 rule simulate_photometry:
     input:
         "data/raw/simulated_seds.pkl",
