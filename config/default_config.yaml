@@ -1,5 +1,12 @@
+####################################################################
+# Name for this run. Except for processed data, which is saved in
+# data/processed, all the results will be saved in results/run_name
+####################################################################
 run_name: default # str
 
+##########################################
+# settings for the photometry simulations
+##########################################
 sims:
   random_seed: 0 # int
   redshifts_per_sed: 100 # int
@@ -15,6 +22,9 @@ sims:
     - lsstz
     - lssty
 
+########################################
+# settings for the VAE that models SEDs
+########################################
 encoder:
   layers: [32] # Sequence[int]
   intrinsic_latent_size: 3 # int
@@ -31,6 +41,9 @@ sed:
   wave_max: 11000. # float
   wave_bins: 64 # int
 
+######################################################################
+# settings for the physics layer that calculates photometry from SEDs
+######################################################################
 physics_layer:
   bandpasses: # Sequence[str]
     - lsstu
@@ -40,6 +53,9 @@ physics_layer:
     - lsstz
     - lssty
 
+#######################################
+# settings for training the LGSM model
+#######################################
 training:
   eta: 0.01 # float
   batch_size: 128 # int
