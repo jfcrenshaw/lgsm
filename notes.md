@@ -6,4 +6,4 @@
 - [ ] implement VAE
 - [ ] implement LGSM model
 - [ ] get default model trained
-- [ ] write some basic tests
+- [ ] write unit test to make sure that the physics layer calculates photometry correctly

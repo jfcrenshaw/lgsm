@@ -90,7 +90,9 @@ class Decoder(elegy.Module):
     def __init__(
         self,
         layers: Sequence[int],
-        sed_wave: np.ndarray,
+        wave_min: float,
+        wave_max: float,
+        wave_bins: int,
         normalize_at: float,
         sed_unit: str,
         batch_norm: bool,
@@ -98,9 +100,12 @@ class Decoder(elegy.Module):
         super().__init__()
 
         self.layers = layers
-        self.sed_wave = sed_wave
         self.normalize_at = normalize_at
         self.sed_unit = sed_unit
+
+        # setup the wavelength array
+        dwave = (wave_max - wave_min) / (wave_bins - 1)
+        self.sed_wave = jnp.arange(wave_min, wave_max + dwave, dwave)
 
         # define the function to normalize the SEDs
         if sed_unit == "mag":
@@ -146,17 +151,22 @@ class VAE(elegy.Module):
         intrinsic_latent_size: int,
         # Decoder settings
         decoder_layers: Sequence[int],
-        sed_wave: np.ndarray,
+        wave_min: float,
+        wave_max: float,
+        wave_bins: int,
         normalize_at: float,
         sed_unit: str,
         # global settings
         batch_norm: bool,
     ):
         super().__init__()
+
         self.encoder_layers = encoder_layers
         self.intrinsic_latent_size = intrinsic_latent_size
         self.decoder_layers = decoder_layers
-        self.sed_wave = sed_wave
+        self.wave_min = wave_min
+        self.wave_max = wave_max
+        self.wave_bins = wave_bins
         self.normalize_at = normalize_at
         self.sed_unit = sed_unit
         self.batch_norm = batch_norm
@@ -173,7 +183,9 @@ class VAE(elegy.Module):
         # decode into an SED
         sed = Decoder(
             layers=self.decoder_layers,
-            sed_wave=self.sed_wave,
+            wave_min=self.wave_min,
+            wave_max=self.wave_max,
+            wave_bins=self.wave_bins,
             normalize_at=self.normalize_at,
             sed_unit=self.sed_unit,
             batch_norm=self.batch_norm,

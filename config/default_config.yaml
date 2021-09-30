@@ -1,12 +1,13 @@
-####################################################################
+--- # ----------------------------------------------------------------
+# ----------------------------------------------------------------
 # Name for this run. Except for processed data, which is saved in
-# data/processed, all the results will be saved in results/run_name
-####################################################################
+# data/processed, and trained models, which are saved in models
+# all the results will be saved in results/run_name
 run_name: default # str
 
-##########################################
+# ----------------------------------------
 # settings for the photometry simulations
-##########################################
+# ----------------------------------------
 sims:
   random_seed: 0 # int
   redshifts_per_sed: 100 # int
@@ -22,42 +23,41 @@ sims:
     - lsstz
     - lssty
 
-########################################
-# settings for the VAE that models SEDs
-########################################
-encoder:
-  layers: [32] # Sequence[int]
-  intrinsic_latent_size: 3 # int
-  batch_norm: True # bool
+# ----------------------------
+# settings for the LGSM model
+# ----------------------------
+lgsm:
+  vae:
+    encoder:
+      layers: [32] # Sequence[int]
+      intrinsic_latent_size: 3 # int
 
-decoder:
-  layers: [8, 16, 32] # Sequence[int]
-  normalize_at: 4000. # float
-  sed_unit: mag # str
-  batch_norm: True # bool
+    decoder:
+      layers: [8, 16, 32] # Sequence[int]
+      wave_min: 1000. # float
+      wave_max: 11000. # float
+      wave_bins: 64 # int
+      normalize_at: 4000. # float
+      sed_unit: mag # str, mag or flambda
 
-sed:
-  wave_min: 1000. # float
-  wave_max: 11000. # float
-  wave_bins: 64 # int
+    batch_norm: True # bool
 
-######################################################################
-# settings for the physics layer that calculates photometry from SEDs
-######################################################################
-physics_layer:
-  bandpasses: # Sequence[str]
-    - lsstu
-    - lsstg
-    - lsstr
-    - lssti
-    - lsstz
-    - lssty
+  physics_layer:
+    bandpasses: # Sequence[str]
+      - lsstu
+      - lsstg
+      - lsstr
+      - lssti
+      - lsstz
+      - lssty
 
-#######################################
-# settings for training the LGSM model
-#######################################
-training:
-  eta: 0.01 # float
-  batch_size: 128 # int
-  learning_rate: 0.001 # float
-  epochs: 100 # int
+  training:
+    eta: 0.01 # float
+    batch_size: 128 # int
+    learning_rate: 0.001 # float
+    epochs: 100 # int
+
+# ----------------------
+# settings for plotting
+# ----------------------
+plotting: None

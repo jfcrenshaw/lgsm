@@ -34,31 +34,29 @@ class PhysicsLayer(elegy.Module):
 
     def __init__(
         self,
-        sed_min: float,
-        sed_max: float,
-        sed_bins: int,
+        wave_min: float,
+        wave_max: float,
+        wave_bins: int,
         sed_unit: str,
         bandpasses: Sequence[str],
         band_oversampling: int,
     ):
         super().__init__()
-        self.sed_min = sed_min
-        self.sed_max = sed_max
-        self.sed_bins = sed_bins
+        self.wave_min = wave_min
+        self.wave_max = wave_max
+        self.wave_bins = wave_bins
         self.sed_unit = sed_unit
         self.bandpasses = bandpasses
         self.band_oversampling = band_oversampling
 
         # save the SED wavelength grid
-        self.sed_dwave = (sed_max - sed_min) / (sed_bins - 1)
-        self.sed_wave = np.arange(
-            self.sed_min, self.sed_max + self.sed_dwave, self.sed_dwave
-        )
+        self.dwave = (wave_max - wave_min) / (wave_bins - 1)
+        self.wave = np.arange(self.wave_min, self.wave_max + self.dwave, self.dwave)
 
         # setup functions to handle sed units
         if self.sed_unit == "mag":
             self.scale_sed = lambda sed, amplitude: amplitude + sed
-            self.convert_sed_units = lambda sed: mag_to_flambda(sed, self.sed_wave)
+            self.convert_sed_units = lambda sed: mag_to_flambda(sed, self.wave)
         else:  # sed_unit == "flambda"
             self.scale_sed = lambda sed, amplitude: amplitude * sed
             self.convert_sed_units = lambda sed: sed
@@ -82,12 +80,12 @@ class PhysicsLayer(elegy.Module):
         ), "band_oversampling must be an odd integer."
         pad = (self.band_oversampling - 1) // 2
 
-        # wavelength grid for bandpass is essentially the same as sed_wave,
+        # wavelength grid for bandpass is essentially the same as wave,
         # potentially with oversampling
-        band_dwave = self.sed_dwave / self.band_oversampling
+        band_dwave = self.dwave / self.band_oversampling
         band_wave = jnp.arange(
-            self.sed_min - band_dwave * pad,
-            self.sed_max + self.sed_dwave + band_dwave * pad,
+            self.wave_min - band_dwave * pad,
+            self.wave_max + self.dwave + band_dwave * pad,
             band_dwave,
         )
 
@@ -129,7 +127,7 @@ class PhysicsLayer(elegy.Module):
         # far more accurate than redshifting SED - at least when comparing
         # to calculations with sncosmo...)
         band_weights = jnp.interp(
-            self.sed_wave,
+            self.wave,
             self.band_wave / (1 + redshift),
             band_weights,
             left=0,
@@ -157,9 +155,9 @@ class PhysicsLayer(elegy.Module):
 
     def call(
         self,
-        sed: jnp.ndarray,
-        amplitude: jnp.ndarray,
-        redshift: jnp.ndarray,
+        sed: np.ndarray,
+        amplitude: np.ndarray,
+        redshift: np.ndarray,
     ) -> dict:
         """Calculate fluxes for the SEDs at the appropriate amplitude and redshifts."""
 
