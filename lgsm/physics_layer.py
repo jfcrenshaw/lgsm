@@ -10,7 +10,7 @@ import sncosmo
 from jax import vmap
 from sncosmo.constants import HC_ERG_AA
 
-from .sed_utils import mag_to_flambda
+from lgsm.sed_utils import mag_to_flambda
 
 
 class PhysicsLayer(elegy.Module):
@@ -34,37 +34,35 @@ class PhysicsLayer(elegy.Module):
 
     def __init__(
         self,
-        wave_min: float,
-        wave_max: float,
-        wave_bins: int,
+        sed_wave: np.ndarray,
         sed_unit: str,
         bandpasses: Sequence[str],
         band_oversampling: int,
     ):
         super().__init__()
-        self.wave_min = wave_min
-        self.wave_max = wave_max
-        self.wave_bins = wave_bins
+
+        # make sure that sed_wave has even sampling
+        dlambda = np.diff(sed_wave)
+        assert np.all(dlambda == dlambda[0]), "sed_wave must be an evenly-spaced grid."
+
+        # save config
+        self.sed_wave = sed_wave
         self.sed_unit = sed_unit
         self.bandpasses = bandpasses
         self.band_oversampling = band_oversampling
 
-        # save the SED wavelength grid
-        self.dwave = (wave_max - wave_min) / (wave_bins - 1)
-        self.wave = np.arange(self.wave_min, self.wave_max + self.dwave, self.dwave)
-
         # setup functions to handle sed units
         if self.sed_unit == "mag":
             self.scale_sed = lambda sed, amplitude: amplitude + sed
-            self.convert_sed_units = lambda sed: mag_to_flambda(sed, self.wave)
+            self.convert_sed_units = lambda sed: mag_to_flambda(sed, self.sed_wave)
         else:  # sed_unit == "flambda"
             self.scale_sed = lambda sed, amplitude: amplitude * sed
             self.convert_sed_units = lambda sed: sed
 
         # precompute the  weights for flux integration
-        self._setup_band_weights()
+        self.band_wave, self.band_weights = self._get_band_weights()
 
-    def _setup_band_weights(self):
+    def _get_band_weights(self):
         """Precompute the weights for flux integration so they can be reused
         over and over again!
         By our definition,
@@ -82,10 +80,11 @@ class PhysicsLayer(elegy.Module):
 
         # wavelength grid for bandpass is essentially the same as wave,
         # potentially with oversampling
-        band_dwave = self.dwave / self.band_oversampling
+        dwave = self.sed_wave[1] - self.sed_wave[0]
+        band_dwave = dwave / self.band_oversampling
         band_wave = jnp.arange(
-            self.wave_min - band_dwave * pad,
-            self.wave_max + self.dwave + band_dwave * pad,
+            self.sed_wave.min() - band_dwave * pad,
+            self.sed_wave.max() + dwave + band_dwave * pad,
             band_dwave,
         )
 
@@ -116,9 +115,10 @@ class PhysicsLayer(elegy.Module):
             )
             band_weights.append(conv_weights)
 
-        # save the band wavelength grid and the convolved weights
-        self.band_wave = jnp.array(band_wave[pad : -pad or None])
-        self.band_weights = jnp.array(band_weights)
+        # return the band wavelength grid and the convolved weights
+        band_wave = band_wave[pad : -pad or None]
+        band_weights = jnp.array(band_weights)
+        return band_wave, band_weights
 
     def _calc_mag_single_sed(self, sed_flambda, redshift, band_weights):
 
@@ -127,7 +127,7 @@ class PhysicsLayer(elegy.Module):
         # far more accurate than redshifting SED - at least when comparing
         # to calculations with sncosmo...)
         band_weights = jnp.interp(
-            self.wave,
+            self.sed_wave,
             self.band_wave / (1 + redshift),
             band_weights,
             left=0,

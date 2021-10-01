@@ -28,18 +28,14 @@ sims:
 # ----------------------------
 lgsm:
   vae:
-    encoder:
-      layers: [32] # Sequence[int]
-      intrinsic_latent_size: 3 # int
-
-    decoder:
-      layers: [8, 16, 32] # Sequence[int]
-      wave_min: 1000. # float
-      wave_max: 11000. # float
-      wave_bins: 64 # int
-      normalize_at: 4000. # float
-      sed_unit: mag # str, mag or flambda
-
+    encoder_layers: [32] # Sequence[int]
+    intrinsic_latent_size: 3 # int
+    decoder_layers: [8, 16, 32] # Sequence[int]
+    wave_bins: 64 # int
+    wave_min: 1000. # float
+    wave_max: 11000. # float
+    normalize_at: 4000. # float
+    sed_unit: mag # str, mag or flambda
     batch_norm: True # bool
 
   physics_layer:
@@ -50,6 +46,7 @@ lgsm:
       - lssti
       - lsstz
       - lssty
+    band_oversampling: 201 # int
 
   training:
     eta: 0.01 # float

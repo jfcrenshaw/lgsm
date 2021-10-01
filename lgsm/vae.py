@@ -90,9 +90,7 @@ class Decoder(elegy.Module):
     def __init__(
         self,
         layers: Sequence[int],
-        wave_min: float,
-        wave_max: float,
-        wave_bins: int,
+        sed_wave: np.ndarray,
         normalize_at: float,
         sed_unit: str,
         batch_norm: bool,
@@ -100,12 +98,9 @@ class Decoder(elegy.Module):
         super().__init__()
 
         self.layers = layers
+        self.sed_wave = sed_wave
         self.normalize_at = normalize_at
         self.sed_unit = sed_unit
-
-        # setup the wavelength array
-        dwave = (wave_max - wave_min) / (wave_bins - 1)
-        self.sed_wave = jnp.arange(wave_min, wave_max + dwave, dwave)
 
         # define the function to normalize the SEDs
         if sed_unit == "mag":
@@ -123,7 +118,7 @@ class Decoder(elegy.Module):
     def call(self, intrinsic_latents: np.ndarray) -> dict:
 
         # construct the first decoder layers
-        for layer in self.decoder_layers:
+        for layer in self.layers:
             intrinsic_latents = elegy.nn.Linear(layer)(intrinsic_latents)
             intrinsic_latents = self.NormLayer()(intrinsic_latents)
             intrinsic_latents = jax.nn.relu(intrinsic_latents)
@@ -138,7 +133,8 @@ class Decoder(elegy.Module):
         ).reshape(-1, 1)
         sed = self.normalize(sed, norm)
 
-        return {f"sed_{self.sed_unit}": sed}
+        # return the wavelength grid and the normalized sed!
+        return {"sed_wave": self.sed_wave, f"sed_{self.sed_unit}": sed}
 
 
 class VAE(elegy.Module):
@@ -151,9 +147,7 @@ class VAE(elegy.Module):
         intrinsic_latent_size: int,
         # Decoder settings
         decoder_layers: Sequence[int],
-        wave_min: float,
-        wave_max: float,
-        wave_bins: int,
+        sed_wave: np.ndarray,
         normalize_at: float,
         sed_unit: str,
         # global settings
@@ -161,34 +155,37 @@ class VAE(elegy.Module):
     ):
         super().__init__()
 
+        # save the config
         self.encoder_layers = encoder_layers
         self.intrinsic_latent_size = intrinsic_latent_size
         self.decoder_layers = decoder_layers
-        self.wave_min = wave_min
-        self.wave_max = wave_max
-        self.wave_bins = wave_bins
+        self.sed_wave = sed_wave
         self.normalize_at = normalize_at
         self.sed_unit = sed_unit
         self.batch_norm = batch_norm
 
+        # instantiate the encoder
+        self.encoder = Encoder(
+            layers=encoder_layers,
+            intrinsic_latent_size=intrinsic_latent_size,
+            batch_norm=batch_norm,
+        )
+
+        # instantiate the decoder
+        self.decoder = Decoder(
+            layers=decoder_layers,
+            sed_wave=sed_wave,
+            normalize_at=normalize_at,
+            sed_unit=sed_unit,
+            batch_norm=batch_norm,
+        )
+
     def call(self, inputs: np.ndarray) -> dict:
 
         # encode the photometry in the implicit/explicit latent space
-        latents = Encoder(
-            layers=self.encoder_layers,
-            intrinsic_latent_size=self.intrinsic_latent_size,
-            batch_norm=self.batch_norm,
-        )(inputs)
+        latents = self.encoder(inputs)
 
         # decode into an SED
-        sed = Decoder(
-            layers=self.decoder_layers,
-            wave_min=self.wave_min,
-            wave_max=self.wave_max,
-            wave_bins=self.wave_bins,
-            normalize_at=self.normalize_at,
-            sed_unit=self.sed_unit,
-            batch_norm=self.batch_norm,
-        )(latents["intrinsic_latents"])
+        sed = self.decoder(latents["intrinsic_latents"])
 
         return {**latents, **sed}
