@@ -1,4 +1,5 @@
-"""Utilities for converting sed units back and forth."""
+"""Utilities for converting sed units back and forth and for setting an
+evenly spaced wavelength grid."""
 import jax.numpy as jnp
 import numpy as np
 
@@ -85,3 +86,10 @@ def freq_to_wave(freq: np.ndarray) -> np.ndarray:
     """Convert frequency in Hertz (Hz) to wavelength in Angstroms (AA)."""
     wave = 2.998e18 / freq
     return wave
+
+
+def setup_wave_grid(wave_min: float, wave_max: float, wave_bins: int) -> np.ndarray:
+    """Setup an evenly spaced wavelength grid."""
+    dwave = dwave = (wave_max - wave_min) / (wave_bins - 1)
+    wave_grid = jnp.arange(wave_min, wave_max + dwave, dwave)
+    return wave_grid

@@ -1,7 +1,26 @@
+# the default config
+# you can specify a new config by running
+# poetry run snakemake -c1 --configfile config/new_config.yaml
+# keys/values missing from the new config will be pulled from the default config
 configfile: "config/default_config.yaml"
 
 
-# name for results directory
+# check if a new config file was passed
+# we are doing this so we can pass this new config as an input to save_config
+# this way it will run that rule if the default config or the new config was updated
+import sys
+args = sys.argv
+# if a new config was passed, get the path
+if "--configfile" in args:
+    new_config_path = args[args.index("--configfile") + 1]
+# if not, just use the default config path
+# the save_config rule doesn't actually do anything with this file anyway,
+# it just checks if it has changed
+else:
+    new_config_path = workflow.configfiles[0]
+
+
+# set the name for results directory
 # except for processed data and trained models that may be shared between many
 # runs, all of the results from the workflow will be saved in this directory
 results_dir = f"results/{config['run_name']}"
@@ -15,17 +34,22 @@ rule all:
     input:
         f"{results_dir}/full_config.yaml",
         "data/processed/simulated_photometry.pkl",
-        directory(model_loc),
+        model_loc,
         f"{results_dir}/model_losses.{config['plotting']['model_losses']['format']}",
 
 
 rule save_config:
+    input:
+        workflow.configfiles[0],
+        new_config_path
     output:
         f"{results_dir}/full_config.yaml",
+    priority:
+        100
     script:
         "scripts/save_config.py"
 
-
+        
 rule simulate_photometry:
     input:
         "data/raw/simulated_seds.pkl",
@@ -46,7 +70,7 @@ rule train_LGSModel:
 
 rule plot_model_loss:
     input:
-        directory(model_loc),
+        model_loc,
     output:
         f"{results_dir}/model_losses.{config['plotting']['model_losses']['format']}",
     script:

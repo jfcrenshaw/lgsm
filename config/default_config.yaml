@@ -61,7 +61,7 @@ lgsm:
         learning_rate: 1.e-3 # float
 
     batch_size: 128 # int
-    epochs: 200 # int
+    epochs: 300 # int
     validation_split: 0.2 # float in [0, 1)
 
 # ----------------------

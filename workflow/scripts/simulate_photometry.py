@@ -8,7 +8,6 @@ import jax.numpy as jnp
 from jax import random
 from lgsm import PhysicsLayer
 
-
 # get values injected to global by snakemake
 input_file = snakemake.input[0]
 output_file = snakemake.output[0]
@@ -48,9 +47,7 @@ amps = random.uniform(
 
 # build the physics layer
 PL = PhysicsLayer(
-    sed_min=wave.min(),
-    sed_max=wave.max(),
-    sed_bins=wave.size,
+    sed_wave=wave,
     sed_unit="mag",
     bandpasses=config["bandpasses"],
     band_oversampling=3,

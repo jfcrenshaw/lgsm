@@ -39,7 +39,8 @@ class Encoder(elegy.Module):
 
         # setup the NormLayer
         # pylint: disable=C0103
-        if batch_norm:
+        self.batch_norm = batch_norm
+        if self.batch_norm:
             self.NormLayer = elegy.nn.BatchNormalization
         else:
             self.NormLayer = IdentityLayer
@@ -108,7 +109,8 @@ class Decoder(elegy.Module):
 
         # setup the NormLayer
         # pylint: disable=C0103
-        if batch_norm:
+        self.batch_norm = batch_norm
+        if self.batch_norm:
             self.NormLayer = elegy.nn.BatchNormalization
         else:
             self.NormLayer = IdentityLayer
@@ -152,15 +154,6 @@ class VAE(elegy.Module):
         batch_norm: bool,
     ):
         super().__init__()
-
-        # save the config
-        self.encoder_layers = encoder_layers
-        self.intrinsic_latent_size = intrinsic_latent_size
-        self.decoder_layers = decoder_layers
-        self.sed_wave = sed_wave
-        self.normalize_at = normalize_at
-        self.sed_unit = sed_unit
-        self.batch_norm = batch_norm
 
         # instantiate the encoder
         self.encoder = Encoder(
