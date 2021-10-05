@@ -1,20 +1,27 @@
 configfile: "config/default_config.yaml"
 
 
-# directory where to store all the results
-# EXCEPT for data that may be shared between many runs
-results_dir = "results/" + config["run_name"] + "/"
+# name for results directory
+# except for processed data and trained models that may be shared between many
+# runs, all of the results from the workflow will be saved in this directory
+results_dir = f"results/{config['run_name']}"
+
+
+# location of the model used in this run
+model_loc = f"models/{config['lgsm']['model_name']}"
 
 
 rule all:
     input:
-        results_dir + "full_config.yaml",
+        f"{results_dir}/full_config.yaml",
         "data/processed/simulated_photometry.pkl",
+        directory(model_loc),
+        f"{results_dir}/model_losses.{config['plotting']['model_losses']['format']}",
 
 
 rule save_config:
     output:
-        results_dir + "full_config.yaml",
+        f"{results_dir}/full_config.yaml",
     script:
         "scripts/save_config.py"
 
@@ -26,3 +33,21 @@ rule simulate_photometry:
         "data/processed/simulated_photometry.pkl",
     script:
         "scripts/simulate_photometry.py"
+
+
+rule train_LGSModel:
+    input:
+        "data/processed/simulated_photometry.pkl",
+    output:
+        directory(model_loc),
+    script:
+        "scripts/train_lgsmodel.py"
+
+
+rule plot_model_loss:
+    input:
+        directory(model_loc),
+    output:
+        f"{results_dir}/model_losses.{config['plotting']['model_losses']['format']}",
+    script:
+        "scripts/plot_model_losses.py"

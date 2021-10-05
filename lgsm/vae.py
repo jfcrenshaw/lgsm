@@ -11,8 +11,6 @@ import numpy as np
 class IdentityLayer:
     """Identity layer that replaces BatchNormalization when batch_norm == False"""
 
-    # pylint: disable=R0903
-
     def __call__(self, inputs: np.ndarray) -> np.ndarray:
         return inputs
 

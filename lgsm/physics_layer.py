@@ -43,7 +43,9 @@ class PhysicsLayer(elegy.Module):
 
         # make sure that sed_wave has even sampling
         dlambda = np.diff(sed_wave)
-        assert np.all(dlambda == dlambda[0]), "sed_wave must be an evenly-spaced grid."
+        assert jnp.all(
+            jnp.allclose(dlambda, dlambda[0])
+        ), "sed_wave must be an evenly-spaced grid."
 
         # save config
         self.sed_wave = sed_wave

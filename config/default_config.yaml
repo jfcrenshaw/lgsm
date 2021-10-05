@@ -27,14 +27,16 @@ sims:
 # settings for the LGSM model
 # ----------------------------
 lgsm:
+  model_name: default_model # str
+
   vae:
     encoder_layers: [32] # Sequence[int]
     intrinsic_latent_size: 3 # int
     decoder_layers: [8, 16, 32] # Sequence[int]
     wave_bins: 64 # int
-    wave_min: 1000. # float
-    wave_max: 11000. # float
-    normalize_at: 4000. # float
+    wave_min: 1.e+3 # float
+    wave_max: 11.e+3 # float
+    normalize_at: 4.e+3 # float
     sed_unit: mag # str, mag or flambda
     batch_norm: True # bool
 
@@ -49,12 +51,30 @@ lgsm:
     band_oversampling: 201 # int
 
   training:
-    eta: 0.01 # float
+    losses:
+      MSE: {} # empty dict, because no parameters
+      SlopeLoss:
+        eta: 1.e-2 # float
+
+    optimizer:
+      adam:
+        learning_rate: 1.e-3 # float
+
     batch_size: 128 # int
-    learning_rate: 0.001 # float
-    epochs: 100 # int
+    epochs: 200 # int
+    validation_split: 0.2 # float in [0, 1)
 
 # ----------------------
 # settings for plotting
 # ----------------------
-plotting: None
+plotting:
+  model_losses:
+    format: png # str, e.g. png, pdf, svg, etc.
+    subplots_settings: # dictionary passed to plt.subplots()
+      nrows: 3 # int
+      ncols: 1 # int
+      figsize: [4, 7] # list
+      constrained_layout: True # bool
+      dpi: 120 # int
+    plot_settings: # dictionary passed to ax.set()
+      yscale: log # str

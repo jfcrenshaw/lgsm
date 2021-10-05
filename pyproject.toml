@@ -27,6 +27,7 @@ jax = "<0.2.21"
 elegy = "^0.7.4"
 sncosmo = "^2.6.0"
 optax = "<0.0.7"
+matplotlib = "^3.4.3"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
@@ -45,6 +46,7 @@ additional-builtins = "snakemake"
 max-args = 1000
 max-attributes = 1000
 max-locals = 1000
+min-public-methods=1
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

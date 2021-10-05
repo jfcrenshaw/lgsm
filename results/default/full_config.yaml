@@ -1,29 +1,53 @@
-decoder:
-  batch_norm: true
-  layers:
-  - 8
-  - 16
-  - 32
-  normalize_at: 4000.0
-  sed_unit: mag
-encoder:
-  batch_norm: true
-  intrinsic_latent_size: 3
-  layers:
-  - 32
-physics_layer:
-  bandpasses:
-  - lsstu
-  - lsstg
-  - lsstr
-  - lssti
-  - lsstz
-  - lssty
+lgsm:
+  model_name: default_model
+  physics_layer:
+    band_oversampling: 201
+    bandpasses:
+    - lsstu
+    - lsstg
+    - lsstr
+    - lssti
+    - lsstz
+    - lssty
+  training:
+    batch_size: 128
+    epochs: 200
+    losses:
+      MSE: {}
+      SlopeLoss:
+        eta: 0.01
+    optimizer:
+      adam:
+        learning_rate: 0.001
+    validation_split: 0.2
+  vae:
+    batch_norm: true
+    decoder_layers:
+    - 8
+    - 16
+    - 32
+    encoder_layers:
+    - 32
+    intrinsic_latent_size: 3
+    normalize_at: 4000.0
+    sed_unit: mag
+    wave_bins: 64
+    wave_max: 11000.0
+    wave_min: 1000.0
+plotting:
+  model_losses:
+    format: png
+    plot_settings:
+      yscale: log
+    subplots_settings:
+      constrained_layout: true
+      dpi: 120
+      figsize:
+      - 4
+      - 7
+      ncols: 1
+      nrows: 3
 run_name: default
-sed:
-  wave_bins: 64
-  wave_max: 11000.0
-  wave_min: 1000.0
 sims:
   bandpasses:
   - lsstu
@@ -38,8 +62,3 @@ sims:
   min_redshift: 0.01
   random_seed: 0
   redshifts_per_sed: 100
-training:
-  batch_size: 128
-  epochs: 100
-  eta: 0.01
-  learning_rate: 0.001
