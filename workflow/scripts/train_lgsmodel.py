@@ -7,7 +7,7 @@ import optax
 from lgsm import LGSModel, losses
 
 # get the values injected to global by snakemake
-input_file = snakemake.input[0]
+input_file = snakemake.input[1]
 output_dir = snakemake.output[0]
 config = snakemake.config["lgsm"]
 

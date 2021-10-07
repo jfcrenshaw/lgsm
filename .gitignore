@@ -133,3 +133,6 @@ dmypy.json
 
 # snakemake hidden folder
 .snakemake/
+
+# ignore my trash directory
+.all_trash/

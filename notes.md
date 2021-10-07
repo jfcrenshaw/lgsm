@@ -2,10 +2,13 @@
 
 ## Week of Oct 4
 
-- [ ] make sure yaml merging is deeply recursive
+- [x] make sure yaml merging is deeply recursive
+- [x] implement flagging for config changes
+- [ ] create rule for plotting the SED reconstruction results
+- [ ] try to get jax with GPU setup
+- [ ] change training so that LossFunction: False excludes that loss
 - [ ] implement spectral loss function
 - [ ] train model with spectral loss
-- [ ] try to get jax with GPU setup
 
 ## Week of Sept 27
 

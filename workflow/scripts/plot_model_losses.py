@@ -3,7 +3,7 @@ import elegy
 import matplotlib.pyplot as plt
 
 # get the values injected to global by snakemake
-input_dir = snakemake.input[0]
+input_dir = snakemake.input[1]
 output_file = snakemake.output[0]
 config = snakemake.config["plotting"]["model_losses"]
 
