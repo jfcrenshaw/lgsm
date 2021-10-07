@@ -67,8 +67,11 @@ rule plot_model_loss:
         "scripts/plot_model_losses.py"
 
 
-# cleanup the config flags
+# cleanup the config flags if exiting with error
 onerror:
     config_flags.cleanup()
+
+
+# cleanup the config flags if exiting with success
 onsuccess:
     config_flags.cleanup()
