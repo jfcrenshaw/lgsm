@@ -1,7 +1,6 @@
 # LGSM: Latent Galaxy SED Model
 
 ![build](https://github.com/jfcrenshaw/lgsm/workflows/build/badge.svg)
-[![codecov](https://codecov.io/gh/jfcrenshaw/lgsm/branch/main/graph/badge.svg?token=D3J92L2wkv)](https://codecov.io/gh/jfcrenshaw/lgsm)
 
 Building a physics-informed VAE model to deconvolve SED's from photometry.
 
