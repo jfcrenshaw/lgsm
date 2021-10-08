@@ -28,7 +28,6 @@ onstart:
 
 rule all:
     input:
-        config_flags.all_flags(),
         "data/processed/simulated_photometry.pkl",
         model_loc,
         model_losses,
