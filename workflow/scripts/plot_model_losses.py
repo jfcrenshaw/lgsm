@@ -13,15 +13,21 @@ history = elegy.load(input_dir).history.history
 # determine how many plots we need
 nplots = len(history.keys()) // 2
 subplot_settings = config["subplots_settings"]
+if "nrows" not in subplot_settings or "ncols" not in subplot_settings:
+    subplot_settings["nrows"] = nplots
+    subplot_settings["ncols"] = 1
 assert (
-    subplot_settings["nrows"] * subplot_settings["ncols"] == nplots
+    subplot_settings["nrows"] * subplot_settings["ncols"] >= nplots
 ), "Not enough rows and columns to plot the losses."
 
 # set up the subplots
 fig, axes = plt.subplots(**subplot_settings)
 
 # plot the losses
-for i, ax in enumerate(axes.flatten()):
+for i in range(nplots):
+
+    # get the axis
+    ax = axes.flatten()[i]
 
     # get the key
     key = list(history.keys())[i]

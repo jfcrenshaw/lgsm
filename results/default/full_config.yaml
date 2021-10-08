@@ -7,22 +7,22 @@ sims:
   min_mag: 18.0
   max_mag: 22.0
   bandpasses:
-  - lsstu
-  - lsstg
-  - lsstr
-  - lssti
-  - lsstz
-  - lssty
+    - lsstu
+    - lsstg
+    - lsstr
+    - lssti
+    - lsstz
+    - lssty
 lgsm:
   model_name: default_model
   vae:
     encoder_layers:
-    - 32
+      - 32
     intrinsic_latent_size: 3
     decoder_layers:
-    - 8
-    - 16
-    - 32
+      - 8
+      - 16
+      - 32
     wave_bins: 64
     wave_min: 1000.0
     wave_max: 11000.0
@@ -31,18 +31,22 @@ lgsm:
     batch_norm: true
   physics_layer:
     bandpasses:
-    - lsstu
-    - lsstg
-    - lsstr
-    - lssti
-    - lsstz
-    - lssty
+      - lsstu
+      - lsstg
+      - lsstr
+      - lssti
+      - lsstz
+      - lssty
     band_oversampling: 201
   training:
     losses:
-      MSE: {}
+      MSE:
+        use: True # bool
+        params: {} # empty dict, because no parameters
       SlopeLoss:
-        eta: 0.01
+        use: True
+        params:
+          eta: 1.e-2 # float
     optimizer:
       adam:
         learning_rate: 0.001
@@ -53,11 +57,9 @@ plotting:
   model_losses:
     format: png
     subplots_settings:
-      nrows: 3
-      ncols: 1
       figsize:
-      - 4
-      - 7
+        - 4
+        - 7
       constrained_layout: true
       dpi: 120
     plot_settings:
@@ -71,8 +73,8 @@ plotting:
     subplots_settings:
       nrows: 5
       figsize:
-      - 10
-      - 12
+        - 10
+        - 12
       constrained_layout: true
       dpi: 120
     ax_settings:

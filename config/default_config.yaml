@@ -50,9 +50,13 @@ lgsm:
 
   training:
     losses:
-      MSE: {} # empty dict, because no parameters
+      MSE:
+        use: True # bool
+        params: {} # empty dict, because no parameters
       SlopeLoss:
-        eta: 1.e-2 # float
+        use: True
+        params:
+          eta: 1.e-2 # float
 
     optimizer:
       adam:
@@ -69,8 +73,6 @@ plotting:
   model_losses:
     format: png # str, e.g. png, pdf, svg, etc.
     subplots_settings: # dictionary passed to plt.subplots()
-      nrows: 3 # int
-      ncols: 1 # int
       figsize: [4, 7] # list
       constrained_layout: True # bool
       dpi: 120 # int

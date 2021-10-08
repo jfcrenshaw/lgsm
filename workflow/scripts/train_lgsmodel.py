@@ -18,9 +18,9 @@ with open(input_file, "rb") as file:
 
 # build the list of loss functions
 losses = [
-    getattr(losses, loss_name)(**loss_params)
-    for loss_name, loss_params in config["training"].pop("losses").items()
-    if loss_params
+    getattr(losses, loss_name)(**loss_settings["params"])
+    for loss_name, loss_settings in config["training"].pop("losses").items()
+    if loss_settings["use"]
 ]
 
 # get the optimizer

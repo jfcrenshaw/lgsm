@@ -105,7 +105,7 @@ for i, ax in enumerate(axes.flatten()):
         plot_photometry(
             photometry[i],
             bandpasses,
-            z=redshift[i],
+            redshift=redshift[i],
             scatter_settings=config["truth"]["photometry_settings"],
             ax=ax,
         )
@@ -125,7 +125,7 @@ for i, ax in enumerate(axes.flatten()):
         plot_photometry(
             predictions["predicted_photometry"][i],
             bandpasses,
-            z=redshift[i],
+            redshift=redshift[i],
             scatter_settings=config["predicted"]["photometry_settings"],
             ax=ax,
         )
