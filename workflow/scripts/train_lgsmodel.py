@@ -20,6 +20,7 @@ with open(input_file, "rb") as file:
 losses = [
     getattr(losses, loss_name)(**loss_params)
     for loss_name, loss_params in config["training"].pop("losses").items()
+    if loss_params
 ]
 
 # get the optimizer

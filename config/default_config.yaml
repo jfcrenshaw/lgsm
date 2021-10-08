@@ -1,5 +1,3 @@
-# ----------------------------------------------------------------
-# ----------------------------------------------------------------
 # Name for this run. Except for processed data, which is saved in
 # data/processed, and trained models, which are saved in models
 # all the results will be saved in results/run_name
@@ -78,3 +76,36 @@ plotting:
       dpi: 120 # int
     plot_settings: # dictionary passed to ax.set()
       yscale: log # str
+
+  model_predictions:
+    format: png # str, e.g. png, pdf, svg, etc.
+    plot_unit: mag # str, either mag, flambda, for fnu
+    ncols_train: 2 # int, number of columns dedicated to examples from training set
+    ncols_val: 2 # int, number of columns dedicated to examples from validation set
+    seed: 0 # int, random seed to select galaxies for plotting
+
+    subplots_settings: # dictionary passed to plt.subplots()
+      nrows: 5 # int
+      figsize: [10, 12] # list
+      constrained_layout: True # bool
+      dpi: 120 # int
+
+    ax_settings: # dictionary passed to ax.set()
+      xlabel: Wavelength (AA)
+      ylabel: AB Magnitude
+
+    predicted: # settings for plotting the model predictions
+      sed_settings: # dict passed to plot_sed as plot_settings
+        c: C1 # str
+      photometry_settings: # dict passed to plot_photometry as scatter_settings
+        facecolors: C1 # str
+        edgecolors: k # str
+        zorder: 10
+
+    truth: # settings for plotting the model predictions
+      sed_settings: # dict passed to plot_sed as plot_settings
+        c: C0 # str
+      photometry_settings: # dict passed to plot_photometry as scatter_settings
+        facecolors: C0 # str
+        edgecolors: k # str
+        zorder: 10

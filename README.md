@@ -14,7 +14,7 @@ If you want to enable GPU support for Jax with CUDA, run
 ```bash
 poetry shell
 pip install --upgrade pip
-pip install --upgrade "jax[cuda111]" -f https://storage.googleapis.com/jax-releases/jax_releases.html
+pip install --upgrade jaxlib==0.1.71+cuda111 -f https://storage.googleapis.com/jax-releases/jax_releases.html
 ```
 
 Note that the final command may need to be changed, depending on your version of Cuda (see more under the installation instructions [here](https://github.com/google/jax)).

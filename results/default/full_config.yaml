@@ -62,3 +62,33 @@ plotting:
       dpi: 120
     plot_settings:
       yscale: log
+  model_predictions:
+    format: png
+    plot_unit: mag
+    ncols_train: 2
+    ncols_val: 2
+    seed: 0
+    subplots_settings:
+      nrows: 5
+      figsize:
+      - 10
+      - 12
+      constrained_layout: true
+      dpi: 120
+    ax_settings:
+      xlabel: Wavelength (AA)
+      ylabel: AB Magnitude
+    predicted:
+      sed_settings:
+        c: C1
+      photometry_settings:
+        facecolors: C1
+        edgecolors: k
+        zorder: 10
+    truth:
+      sed_settings:
+        c: C0
+      photometry_settings:
+        facecolors: C0
+        edgecolors: k
+        zorder: 10

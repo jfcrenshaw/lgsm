@@ -4,8 +4,8 @@
 
 - [x] make sure yaml merging is deeply recursive
 - [x] implement flagging for config changes
-- [ ] create rule for plotting the SED reconstruction results
-- [ ] try to get jax with GPU setup
+- [x] create rule for plotting the SED reconstruction results
+- [x] try to get jax with GPU setup
 - [ ] change training so that LossFunction: False excludes that loss
 - [ ] implement spectral loss function
 - [ ] train model with spectral loss
