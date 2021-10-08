@@ -9,9 +9,11 @@ from jax import random
 from lgsm import PhysicsLayer
 
 # get values injected to global by snakemake
+# pylint: disable=undefined-variable
 input_file = snakemake.input[1]
 output_file = snakemake.output[0]
 config = snakemake.config["sims"]
+# pylint: enable=undefined-variable
 
 
 # load the simulated SEDs

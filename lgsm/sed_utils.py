@@ -4,7 +4,9 @@ import jax.numpy as jnp
 import numpy as np
 
 
-def mag_to_fnu(mag: np.ndarray, **kwargs) -> np.ndarray:
+def mag_to_fnu(
+    mag: np.ndarray, wave: None = None  # pylint: disable=unused-argument
+) -> np.ndarray:
     """Convert AB magnitudes to F_nu in erg/s/Hz/cm^2.
     In the AB magnitude system, an object with flux density F_nu = 3631 Jansky
     has a magnitude of zero in all bands (note: 1 Jansky = 1e-23 erg/s/Hz/cm^2).
@@ -15,7 +17,7 @@ def mag_to_fnu(mag: np.ndarray, **kwargs) -> np.ndarray:
     return fnu
 
 
-def fnu_to_flambda(fnu: np.ndarray, wave: np.ndarray, **kwargs) -> np.ndarray:
+def fnu_to_flambda(fnu: np.ndarray, wave: np.ndarray) -> np.ndarray:
     """Convert F_nu in erg/s/Hz/cm^2 to F_lambda in erg/s/AA/cm^2.
     To convert from F_nu to F_lambda, we use the formula
     F_lambda = c / lambda^2 * F_nu,
@@ -25,7 +27,7 @@ def fnu_to_flambda(fnu: np.ndarray, wave: np.ndarray, **kwargs) -> np.ndarray:
     return flambda
 
 
-def mag_to_flambda(mag: np.ndarray, wave: np.ndarray, **kwargs) -> np.ndarray:
+def mag_to_flambda(mag: np.ndarray, wave: np.ndarray) -> np.ndarray:
     """Convert AB magnitudes to F_lambda in erg/s/AA/cm^2.
     In the AB magnitude system, an object with flux density F_nu = 3631 Jansky
     has a magnitude of zero in all bands (note: 1 Jansky = 1e-23 erg/s/Hz/cm^2).
@@ -40,7 +42,7 @@ def mag_to_flambda(mag: np.ndarray, wave: np.ndarray, **kwargs) -> np.ndarray:
     return flambda
 
 
-def flambda_to_fnu(flambda: np.ndarray, wave: np.ndarray, **kwargs) -> np.ndarray:
+def flambda_to_fnu(flambda: np.ndarray, wave: np.ndarray) -> np.ndarray:
     """Convert F_lambda in erg/s/AA/cm^2 to F_nu in erg/s/Hz/cm^2.
     To convert from F_lambda to F_nu, we use the formula
     F_nu = lambda^2 / c * F_lambda,
@@ -50,7 +52,9 @@ def flambda_to_fnu(flambda: np.ndarray, wave: np.ndarray, **kwargs) -> np.ndarra
     return fnu
 
 
-def fnu_to_mag(fnu: np.ndarray, **kwargs) -> np.ndarray:
+def fnu_to_mag(
+    fnu: np.ndarray, wave: None = None  # pylint: disable=unused-argument
+) -> np.ndarray:
     """Convert F_nu in erg/s/Hz/cm^2 to AB magnitudes.
     In the AB magnitude system, an object with flux density F_nu = 3631 Jansky
     has a magnitude of zero in all bands (note: 1 Jansky = 1e-23 erg/s/Hz/cm^2).
@@ -61,7 +65,7 @@ def fnu_to_mag(fnu: np.ndarray, **kwargs) -> np.ndarray:
     return mag
 
 
-def flambda_to_mag(flambda: np.ndarray, wave: np.ndarray, **kwargs) -> np.ndarray:
+def flambda_to_mag(flambda: np.ndarray, wave: np.ndarray) -> np.ndarray:
     """Convert F_lambda in erg/s/AA/cm^2 to AB magnitudes.
     To convert from F_lambda to F_nu, we use the formula
     F_nu = lambda^2 / c * F_lambda,

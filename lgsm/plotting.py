@@ -6,16 +6,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sncosmo
 
-import lgsm.sed_utils as sed_utils
+from lgsm import sed_utils
 
 
 def plot_photometry(
     photometry: np.ndarray,
     bandpasses: Sequence[str],
     redshift: np.ndarray = np.zeros(1),
-    fig_settings: dict = {},
-    ax_settings: dict = {},
-    scatter_settings: dict = {},
+    fig_settings: dict = None,
+    ax_settings: dict = None,
+    scatter_settings: dict = None,
     ax: plt.Axes = None,
 ) -> Tuple[plt.Figure, plt.Axes]:
     """Plots the given photometry
@@ -53,6 +53,11 @@ def plot_photometry(
     redshift = np.array(redshift)
     if np.any(redshift < 0):
         raise ValueError("redshift must be non-negative")
+
+    # assign empty dicts to settings that are None
+    for settings in [fig_settings, ax_settings, scatter_settings]:
+        if settings is None:
+            settings = {}
 
     # if ax is passed, don't pass fig_settings
     if ax is not None and len(fig_settings) > 0:
@@ -98,9 +103,9 @@ def _plot_sed(
     normalize_at: float = None,
     sed_unit: str = "mag",
     plot_unit: str = None,
-    fig_settings: dict = {},
-    ax_settings: dict = {},
-    plot_settings: dict = {},
+    fig_settings: dict = None,
+    ax_settings: dict = None,
+    plot_settings: dict = None,
     ax: plt.Axes = None,
 ) -> Tuple[plt.Figure, plt.Axes]:
 
@@ -121,6 +126,11 @@ def _plot_sed(
         plot_unit = sed_unit
     if plot_unit not in units_allowed:
         raise ValueError(f"plot_unit must be one of {', '.join(units_allowed)}")
+
+    # assign empty dicts to settings that are None
+    for settings in [fig_settings, ax_settings, plot_settings]:
+        if settings is None:
+            settings = {}
 
     # redshift the sed
     wave = wave * (1 + redshift)
@@ -182,9 +192,9 @@ def plot_sed(
     normalize_at: float = None,
     sed_unit: str = "mag",
     plot_unit: str = None,
-    fig_settings: dict = {},
-    ax_settings: dict = {},
-    plot_settings: dict = {},
+    fig_settings: dict = None,
+    ax_settings: dict = None,
+    plot_settings: dict = None,
     ax: plt.Axes = None,
 ) -> Tuple[plt.Figure, plt.Axes]:
     """Plots the given seds
@@ -224,6 +234,11 @@ def plot_sed(
     plt.Axes
         The matplotlib.pyplot axes the photometry is plotted on.
     """
+
+    # assign empty dicts to settings that are None
+    for settings in [fig_settings, ax_settings, plot_settings]:
+        if settings is None:
+            settings = {}
 
     # if ax is passed, don't pass fig_settings
     if ax is not None and len(fig_settings) > 0:

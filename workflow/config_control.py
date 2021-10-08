@@ -12,6 +12,8 @@ class ConfigFlags:
     are changed, the corresponding rules will be re-run.
     """
 
+    _flag_path = ".config_flags"  # path where the flags will be stored
+
     def __init__(
         self,
         new_config: dict,
@@ -49,11 +51,14 @@ class ConfigFlags:
                 "config against which to compare the new config."
             )
 
-        # set the path where the flags will be stored
-        self._flag_path = ".config_flags"
+        # create directory to hold the flags
         Path(self._flag_path).mkdir(exist_ok=True)
 
-    def _get_nested_value(self, dictionary, keys):
+        # set all_lowered to False
+        self._all_lowered = False
+
+    @staticmethod
+    def _get_nested_value(dictionary, keys):
         """Get value from nested dictionary keys."""
         return reduce(lambda d, k: d[k], keys, dictionary)
 
@@ -65,14 +70,19 @@ class ConfigFlags:
         ref_val = self._get_nested_value(self._ref_config, keys)
 
         # compare the config values...
-        # if they are the same, do not raise a flag
-        if new_val == ref_val:
+        # if they are the same, or self.lower_all() has been called,
+        # do not raise a flag
+        if new_val == ref_val or self._all_lowered:
             return []
-        # if they are different, raise a flag
+        # else raise a flag
         else:
             flag_file = f"{self._flag_path}/{'_'.join(keys)}_changed"
             Path(flag_file).touch()
             return flag_file
+
+    def lower_all(self):
+        """Lower all the flags regardless of config changes."""
+        self._all_lowered = True
 
     def cleanup(self):
         """Remove all the flag files."""

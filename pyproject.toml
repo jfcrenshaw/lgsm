@@ -37,16 +37,19 @@ pytest-cov = "^2.12.1"
 snakefmt = "^0.4.3"
 
 [tool.pylint.message-control]
-disable = "arguments-differ"
-
-[tool.pylint.variables]
-additional-builtins = "snakemake"
-
-[tool.pylint.design]
-max-args = 1000
-max-attributes = 1000
-max-locals = 1000
-min-public-methods=1
+enable = "useless-suppression"
+disable = [
+    "arguments-differ",
+    "invalid-name",
+    "no-else-return",
+    "too-few-public-methods",
+    "too-many-arguments",
+    "too-many-branches",
+    "too-many-function-args",
+    "too-many-instance-attributes",
+    "too-many-locals",
+    "unspecified-encoding",
+]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

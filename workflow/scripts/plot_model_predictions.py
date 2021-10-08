@@ -1,3 +1,4 @@
+"""Plots SED and photometry predictions for the trained LGS Model."""
 import pickle
 
 import elegy
@@ -6,6 +7,7 @@ import numpy as np
 from lgsm.plotting import plot_photometry, plot_sed
 
 # get the values injected to global by snakemake
+# pylint: disable=undefined-variable
 model_dir = snakemake.input[1]
 data_file = snakemake.input[2]
 sims_file = snakemake.input[3]
@@ -14,6 +16,7 @@ config = snakemake.config["plotting"]["model_predictions"]
 val_split = snakemake.config["lgsm"]["training"]["validation_split"]
 sed_unit = snakemake.config["lgsm"]["vae"]["sed_unit"]
 bandpasses = snakemake.config["lgsm"]["physics_layer"]["bandpasses"]
+# pylint: enable=undefined-variable
 
 
 # make sure ncols isn't in the subplots_settings
@@ -23,9 +26,9 @@ if "ncols" in config["subplots_settings"]:
         "Provide ncols_train and ncols_val instead. "
         "See the default config for an example."
     )
-# if it's not, calculate its value from the training and validation ncols
-else:
-    config["subplots_settings"]["ncols"] = config["ncols_train"] + config["ncols_val"]
+
+# calculate ncols from the training and validation ncols
+config["subplots_settings"]["ncols"] = config["ncols_train"] + config["ncols_val"]
 
 # load the data
 with open(data_file, "rb") as file:
