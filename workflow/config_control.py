@@ -25,13 +25,12 @@ class ConfigFlags:
         Parameters
         ----------
         new_config : dict
-            The dictionary of new config settings
+            The dictionary of new config settings.
         old_config_path : str, optional
-            The path to the old config file (or the path where the new config
-            file will be later saved).
+            The path to the old config file.
         default_config_path : str, optional
             The path to the default config file against which to check the
-            new config, if there is no config at old_config_path
+            new config, if there is no config at old_config_path.
         """
 
         # save the new config
@@ -48,60 +47,35 @@ class ConfigFlags:
                 self._ref_config = yaml.safe_load(file)
         # else, there is no reference
         else:
-            self._ref_config = None
+            raise ValueError(
+                "You must provide the path to an old config or a default "
+                "config against which to compare the new config."
+            )
 
         # set the path where the flags will be stored
-        if old_config_path is not None:
-            self._flag_path = Path(old_config_path).parent / ".config_flags"
-        else:
-            self._flag_path = ".config_flags"
-        Path(self._flag_path).mkdir(parents=True, exist_ok=True)
-
-        # create a flag counter to make sure all flags are unique
-        self._flag_counter = count()
-
-        # create an array to hold all the flags
-        self._all_flags = []
+        self._flag_path = ".config_flags"
+        Path(self._flag_path).mkdir(exist_ok=True)
 
     def _get_nested_value(self, dictionary, keys):
         """Get value from nested dictionary keys."""
         return reduce(lambda d, k: d[k], keys, dictionary)
 
-    def flag(self, *keys: str) -> Union[str, AnnotatedString, List[AnnotatedString]]:
+    def flag(self, *keys: str) -> Union[str, list]:
         """Set a flag for the given config key(s) in a snakemake rule input."""
 
-        # get the stem of the flag file
-        flag_file = f"{self._flag_path}/flag{next(self._flag_counter)}_{'_'.join(keys)}"
-
-        # compare the new and reference values
+        # get the new and reference config values for this chain of keys
         new_val = self._get_nested_value(self._new_config, keys)
         ref_val = self._get_nested_value(self._ref_config, keys)
-        # if the values are the same, lower this flag
-        # this means we will return an ancient string, so that snakemake will
-        # consider this flag older than the output and the corresponding rule
-        # will not be triggered
+
+        # compare the config values...
+        # if they are the same, do not raise a flag
         if new_val == ref_val:
-            flag_file += "_lowered"
-            flag_file = ancient(flag_file)
-        # if the values are different, raise this flag
-        # this means we will return a normal string, so that snakemake will
-        # consider this flag newer than the output and the corresponding rule
-        # will be triggered
+            return []
+        # if they are different, raise a flag
         else:
-            flag_file += "_raised"
-
-        # create the flag
-        Path(str(flag_file)).touch()
-
-        # append the flag to the list of all flags
-        self._all_flags.append(flag_file)
-
-        # return the flag to the input of a snakemake rule
-        return flag_file
-
-    def all_flags(self, wildcards=None) -> Callable:
-        """Return all the flags for input to the snakemake all rule."""
-        return lambda wildcards: self._all_flags
+            flag_file = f"{self._flag_path}/{'_'.join(keys)}_changed"
+            Path(flag_file).touch()
+            return flag_file
 
     def cleanup(self):
         """Remove all the flag files."""
