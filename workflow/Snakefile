@@ -57,7 +57,7 @@ rule train_LGSModel:
 
 rule plot_model_losses:
     input:
-        config_flags.flag("plotting"),
+        config_flags.flag("plotting", "model_losses"),
         model_loc,
     output:
         model_losses,
@@ -67,7 +67,7 @@ rule plot_model_losses:
 
 rule plot_model_predictions:
     input:
-        config_flags.flag("plotting"),
+        config_flags.flag("plotting", "model_predictions"),
         model_loc,
         training_data,
         "data/raw/simulated_seds.pkl",

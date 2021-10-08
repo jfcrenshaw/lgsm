@@ -4,6 +4,7 @@ from shutil import rmtree
 from typing import List, Union, Callable
 from warnings import warn
 from itertools import count
+from functools import reduce
 
 import yaml
 from snakemake.io import AnnotatedString, ancient
@@ -11,20 +12,21 @@ from snakemake.io import AnnotatedString, ancient
 
 class ConfigFlags:
     """Controls flagging the config file so that if sections of the config
-    are changed, the corresponding rules will be rerun.
-
-    Note you can only flag the top-level keys in config.
+    are changed, the corresponding rules will be re-run.
     """
 
     def __init__(
-        self, new_config: dict, old_config_path: str, default_config_path: str = None
+        self,
+        new_config: dict,
+        old_config_path: str = None,
+        default_config_path: str = None,
     ):
         """
         Parameters
         ----------
         new_config : dict
             The dictionary of new config settings
-        old_config_path : str
+        old_config_path : str, optional
             The path to the old config file (or the path where the new config
             file will be later saved).
         default_config_path : str, optional
@@ -32,76 +34,61 @@ class ConfigFlags:
             new config, if there is no config at old_config_path
         """
 
+        # save the new config
+        self._new_config = new_config
+
+        # set the reference config
+        # if the old config exists, use that as the reference config
+        if old_config_path is not None and Path(old_config_path).is_file():
+            with open(old_config_path, "r") as file:
+                self._ref_config = yaml.safe_load(file)
+        # else if a default config is passed, used that as the ref config
+        elif default_config_path is not None and Path(default_config_path).is_file():
+            with open(default_config_path, "r") as file:
+                self._ref_config = yaml.safe_load(file)
+        # else, there is no reference
+        else:
+            self._ref_config = None
+
+        # set the path where the flags will be stored
+        if old_config_path is not None:
+            self._flag_path = Path(old_config_path).parent / ".config_flags"
+        else:
+            self._flag_path = ".config_flags"
+        Path(self._flag_path).mkdir(parents=True, exist_ok=True)
+
+        # create a flag counter to make sure all flags are unique
+        self._flag_counter = count()
+
         # create an array to hold all the flags
         self._all_flags = []
 
-        # set the path where the flags will be stored
-        self._flag_dir = Path(old_config_path).parent / ".config_flags"
+    def _get_nested_value(self, dictionary, keys):
+        """Get value from nested dictionary keys."""
+        return reduce(lambda d, k: d[k], keys, dictionary)
 
-        # setup the flag dictionary
-        # for each key, we will store
-        #   - the path to the flags
-        #   - whether or not the key has been flagged (i.e. if the config
-        #       for this key has changed)
-        #   - whether or not a snakemake rule has used this flag
-        self._flag_dict = {
-            key: {
-                "path": f"{self._flag_dir}/{key}",
-                "iter": count(),
-                "flagged": True,
-                "used": False,
-            }
-            for key in new_config
-        }
+    def flag(self, *keys: str) -> Union[str, AnnotatedString, List[AnnotatedString]]:
+        """Set a flag for the given config key(s) in a snakemake rule input."""
 
-        # now we will create directories for the flags
-        for val in self._flag_dict.values():
-            flag_path = val["path"]
-            Path(flag_path).mkdir(parents=True, exist_ok=True)
+        # get the stem of the flag file
+        flag_file = f"{self._flag_path}/flag{next(self._flag_counter)}_{'_'.join(keys)}"
 
-        # set the reference config
-        ref_config = None
-
-        # if the old config exists, use that as the reference config
-        if Path(old_config_path).is_file():
-            with open(old_config_path, "r") as file:
-                ref_config = yaml.safe_load(file)
-        # else if a default config is passed, used that as the ref config
-        elif default_config_path is not None:
-            with open(default_config_path, "r") as file:
-                ref_config = yaml.safe_load(file)
-
-        # if we have a reference config, compare the config for each key
-        # of the new config against the reference, and if they are the same
-        # lower the flag for that key so the corresponding tules are not
-        # re-run by snakemake
-        if ref_config is not None:
-            for key, val in self._flag_dict.items():
-                if new_config[key] == ref_config[key]:
-                    val["flagged"] = False
-
-    def flag(self, key: str) -> Union[str, AnnotatedString, List[AnnotatedString]]:
-        """Set a flag for the given config key in a snakemake rule input."""
-
-        # note that a snakemake rule has used this flag
-        self._flag_dict[key]["used"] = True
-
-        # get the flag file
-        flag_path = self._flag_dict[key]["path"]
-        flag_iter = self._flag_dict[key]["iter"]
-        flag_file = f"{flag_path}/flag{next(flag_iter)}"
-
-        # if the key is flagged, note that this flag is raised, and return a
-        # normal string, so that snakemake will consider the flag newer than
-        # the output and the corresponding rule will be triggered
-        if self._flag_dict[key]["flagged"]:
-            flag_file += "_raised"
-        # else, if the key isn't flagged, note that this flag is lowered, and
-        # return an ancient string, so that snakemake will consider the flag
-        # older than the output and the corresponding rule will not be triggered
-        else:
+        # compare the new and reference values
+        new_val = self._get_nested_value(self._new_config, keys)
+        ref_val = self._get_nested_value(self._ref_config, keys)
+        # if the values are the same, lower this flag
+        # this means we will return an ancient string, so that snakemake will
+        # consider this flag older than the output and the corresponding rule
+        # will not be triggered
+        if new_val == ref_val:
             flag_file += "_lowered"
             flag_file = ancient(flag_file)
+        # if the values are different, raise this flag
+        # this means we will return a normal string, so that snakemake will
+        # consider this flag newer than the output and the corresponding rule
+        # will be triggered
+        else:
+            flag_file += "_raised"
 
         # create the flag
         Path(str(flag_file)).touch()
@@ -118,24 +105,7 @@ class ConfigFlags:
 
     def cleanup(self):
         """Remove all the flag files."""
-
-        # iterate through all the keys
-        for key, val in self._flag_dict.items():
-            # if the key is flagged, but the flag isn't used, send a warning
-            if val["flagged"] is True and val["used"] is False:
-                warn(
-                    "\n\nWARNING: "
-                    f"Config for {key} changed, but this didn't trigger any rules. "
-                    "You likely need to flag the rules in the Snakefile that use "
-                    "this set of config settings.\n",
-                    stacklevel=7,
-                )
-
-            # remove the flags
-            rmtree(val["path"])
-
-        # delete the folder that held all the flags
-        Path(self._flag_dir).rmdir()
+        rmtree(self._flag_path)
 
 
 def _return_ordered_config(unordered_config: dict, template_config: dict) -> dict:
