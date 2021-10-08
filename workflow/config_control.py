@@ -1,13 +1,10 @@
 """Tools to help handle snakemake configs."""
+from functools import reduce
 from pathlib import Path
 from shutil import rmtree
-from typing import List, Union, Callable
-from warnings import warn
-from itertools import count
-from functools import reduce
+from typing import Union
 
 import yaml
-from snakemake.io import AnnotatedString, ancient
 
 
 class ConfigFlags:
