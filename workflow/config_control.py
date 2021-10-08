@@ -16,7 +16,9 @@ class ConfigFlags:
     Note you can only flag the top-level keys in config.
     """
 
-    def __init__(self, new_config: dict, old_config_path: str):
+    def __init__(
+        self, new_config: dict, old_config_path: str, default_config_path: str = None
+    ):
         """
         Parameters
         ----------
@@ -25,6 +27,9 @@ class ConfigFlags:
         old_config_path : str
             The path to the old config file (or the path where the new config
             file will be later saved).
+        default_config_path : str, optional
+            The path to the default config file against which to check the
+            new config, if there is no config at old_config_path
         """
 
         # create an array to hold all the flags
@@ -54,16 +59,25 @@ class ConfigFlags:
             flag_path = val["path"]
             Path(flag_path).mkdir(parents=True, exist_ok=True)
 
-        # if the old config exists, we will compare the new and old configs
+        # set the reference config
+        ref_config = None
+
+        # if the old config exists, use that as the reference config
         if Path(old_config_path).is_file():
             with open(old_config_path, "r") as file:
-                old_config = yaml.safe_load(file)
+                ref_config = yaml.safe_load(file)
+        # else if a default config is passed, used that as the ref config
+        elif default_config_path is not None:
+            with open(default_config_path, "r") as file:
+                ref_config = yaml.safe_load(file)
 
-            # for each key,
-            # if the new config is the same as the old, we will lower the
-            # flag so these rules are not re-run by snakemake
+        # if we have a reference config, compare the config for each key
+        # of the new config against the reference, and if they are the same
+        # lower the flag for that key so the corresponding tules are not
+        # re-run by snakemake
+        if ref_config is not None:
             for key, val in self._flag_dict.items():
-                if new_config[key] == old_config[key]:
+                if new_config[key] == ref_config[key]:
                     val["flagged"] = False
 
     def flag(self, key: str) -> Union[str, AnnotatedString, List[AnnotatedString]]:

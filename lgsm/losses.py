@@ -7,14 +7,14 @@ import numpy as np
 class MSE(elegy.losses.MeanSquaredError):
     """Mean Square Error for photometry."""
 
-    def call(self, x: np.ndarray, y_pred: dict) -> np.ndarray:
+    def call(self, x: np.ndarray, y_pred: dict, **kwargs) -> np.ndarray:
         return super().call(y_true=x[:, 1:], y_pred=y_pred["predicted_photometry"])
 
 
 class SlopeLoss(elegy.Loss):
     """Penalty on differences in neighboring bins."""
 
-    def __init__(self, eta: float):
+    def __init__(self, eta: float, **kwargs):
         super().__init__()
         self.eta = eta
 

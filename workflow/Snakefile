@@ -19,7 +19,7 @@ model_predictions = f"{results_dir}/model_predictions.{config['plotting']['model
 # set path to the full config to be checked against and then saved
 full_config = f"{results_dir}/full_config.yaml"
 # set up the config flags
-config_flags = ConfigFlags(config, full_config)
+config_flags = ConfigFlags(config, full_config, default_config)
 
 # save the current config
 onstart:
