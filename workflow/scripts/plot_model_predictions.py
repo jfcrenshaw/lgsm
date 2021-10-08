@@ -8,9 +8,9 @@ from lgsm.plotting import plot_photometry, plot_sed
 
 # get the values injected to global by snakemake
 # pylint: disable=undefined-variable
-model_dir = snakemake.input[1]
-data_file = snakemake.input[2]
-sims_file = snakemake.input[3]
+model_dir = snakemake.input[0]
+data_file = snakemake.input[1]
+sims_file = snakemake.input[2]
 output_file = snakemake.output[0]
 config = snakemake.config["plotting"]["model_predictions"]
 val_split = snakemake.config["lgsm"]["training"]["validation_split"]

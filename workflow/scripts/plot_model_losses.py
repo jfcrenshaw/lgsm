@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 # get the values injected to global by snakemake
 # pylint: disable=undefined-variable
-input_dir = snakemake.input[1]
+input_dir = snakemake.input[0]
 output_file = snakemake.output[0]
 config = snakemake.config["plotting"]["model_losses"]
 # pylint: enable=undefined-variable

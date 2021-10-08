@@ -36,8 +36,8 @@ rule all:
 
 rule simulate_photometry:
     input:
-        config_flags.flag("sims"),
         "data/raw/simulated_seds.pkl",
+        config_flags.flag("sims"),
     output:
         "data/processed/simulated_photometry.pkl",
     script:
@@ -46,8 +46,8 @@ rule simulate_photometry:
 
 rule train_LGSModel:
     input:
-        config_flags.flag("lgsm"),
         training_data,
+        config_flags.flag("lgsm"),
     output:
         directory(model_loc),
     script:
@@ -56,8 +56,8 @@ rule train_LGSModel:
 
 rule plot_model_losses:
     input:
-        config_flags.flag("plotting", "model_losses"),
         model_loc,
+        config_flags.flag("plotting", "model_losses"),
     output:
         model_losses,
     script:
@@ -66,10 +66,10 @@ rule plot_model_losses:
 
 rule plot_model_predictions:
     input:
-        config_flags.flag("plotting", "model_predictions"),
         model_loc,
         training_data,
         "data/raw/simulated_seds.pkl",
+        config_flags.flag("plotting", "model_predictions"),
     output:
         model_predictions,
     script:
