@@ -55,9 +55,12 @@ def plot_photometry(
         raise ValueError("redshift must be non-negative")
 
     # assign empty dicts to settings that are None
-    for settings in [fig_settings, ax_settings, scatter_settings]:
-        if settings is None:
-            settings = {}
+    if fig_settings is None:
+        fig_settings = {}
+    if ax_settings is None:
+        ax_settings = {}
+    if scatter_settings is None:
+        scatter_settings = {}
 
     # if ax is passed, don't pass fig_settings
     if ax is not None and len(fig_settings) > 0:
@@ -128,9 +131,12 @@ def _plot_sed(
         raise ValueError(f"plot_unit must be one of {', '.join(units_allowed)}")
 
     # assign empty dicts to settings that are None
-    for settings in [fig_settings, ax_settings, plot_settings]:
-        if settings is None:
-            settings = {}
+    if fig_settings is None:
+        fig_settings = {}
+    if ax_settings is None:
+        ax_settings = {}
+    if plot_settings is None:
+        plot_settings = {}
 
     # redshift the sed
     wave = wave * (1 + redshift)
@@ -236,9 +242,12 @@ def plot_sed(
     """
 
     # assign empty dicts to settings that are None
-    for settings in [fig_settings, ax_settings, plot_settings]:
-        if settings is None:
-            settings = {}
+    if fig_settings is None:
+        fig_settings = {}
+    if ax_settings is None:
+        ax_settings = {}
+    if plot_settings is None:
+        plot_settings = {}
 
     # if ax is passed, don't pass fig_settings
     if ax is not None and len(fig_settings) > 0:
