@@ -48,6 +48,7 @@ disable = [
     "too-many-function-args",
     "too-many-instance-attributes",
     "too-many-locals",
+    "too-many-statements",
     "unspecified-encoding",
 ]
 

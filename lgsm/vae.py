@@ -60,10 +60,10 @@ class Encoder(elegy.Module):
         # calculate the intrinsic latent variables, which are drawn from
         # a normal distribution
         mean = elegy.nn.Linear(self.intrinsic_latent_size, name="linear_mean")(inputs)
-        log_stds = elegy.nn.Linear(self.intrinsic_latent_size, name="linear_std")(
+        log_var = elegy.nn.Linear(self.intrinsic_latent_size, name="linear_std")(
             inputs
         )
-        stds = jnp.exp(log_stds)
+        stds = jnp.exp(log_var / 2)
         intrinsic_latents = mean + stds * jax.random.normal(self.next_key(), mean.shape)
 
         # calculate the extrinsic latent variables (not including the redshift,
@@ -77,6 +77,8 @@ class Encoder(elegy.Module):
         amplitude = extrinsic_latents[:, 0, None]
 
         return {
+            "latent_mean": mean,
+            "latent_std": stds,
             "intrinsic_latents": intrinsic_latents,
             "amplitude": amplitude,
             "redshift": redshift,

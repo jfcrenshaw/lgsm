@@ -40,13 +40,9 @@ lgsm:
     band_oversampling: 201
   training:
     losses:
-      MSE:
-        use: true
-        params: {}
-      SlopeLoss:
-        use: true
-        params:
-          eta: 0.01
+      KLDiv: true
+      MSE: true
+      SlopeLoss: false
     optimizer:
       adam:
         learning_rate: 0.001

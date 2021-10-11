@@ -5,6 +5,7 @@ from shutil import rmtree
 from typing import Union
 
 import yaml
+from snakemake.io import ancient
 
 
 class ConfigFlags:
@@ -13,6 +14,7 @@ class ConfigFlags:
     """
 
     _flag_path = ".config_flags"  # path where the flags will be stored
+    _lowered_flag = "lowered_flag"  # used to signify no change to config
 
     def __init__(
         self,
@@ -71,14 +73,18 @@ class ConfigFlags:
 
         # compare the config values...
         # if they are the same, or self.lower_all() has been called,
-        # do not raise a flag
+        # return an ancient flag lowered flag so that snakemake considers
+        # the flag older than all outputs, and the rule is not triggered
         if new_val == ref_val or self._all_lowered:
-            return []
+            flag_file = ancient(f"{self._flag_path}/{self._lowered_flag}")
         # else raise a flag
         else:
             flag_file = f"{self._flag_path}/{'_'.join(keys)}_changed"
-            Path(flag_file).touch()
-            return flag_file
+
+        # create the flag file
+        Path(str(flag_file)).touch()
+        # return the flag to the snakemake rule input
+        return flag_file
 
     def lower_all(self):
         """Lower all the flags regardless of config changes."""
