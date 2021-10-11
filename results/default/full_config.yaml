@@ -40,9 +40,20 @@ lgsm:
     band_oversampling: 201
   training:
     losses:
-      KLDiv: true
-      MSE: true
-      SlopeLoss: false
+      KLDiv:
+        use: true
+        params: {}
+      PhotometryMSE:
+        use: true
+        params: {}
+      ColorMSE:
+        use: false
+        params:
+          ref_idx: 3
+      SlopeLoss:
+        use: false
+        params:
+          eta: 0.01
     optimizer:
       adam:
         learning_rate: 0.001
@@ -65,7 +76,9 @@ plotting:
     plot_unit: mag
     ncols_train: 2
     ncols_val: 2
-    seed: 0
+    galaxy_seed: 0
+    nsamples: 10
+    encoder_seed: 0
     subplots_settings:
       nrows: 5
       figsize:
@@ -86,7 +99,10 @@ plotting:
     truth:
       sed_settings:
         c: C0
+        lw: 0.5
+        alpha: 0.75
       photometry_settings:
         facecolors: C0
         edgecolors: k
+        alpha: 0.75
         zorder: 10

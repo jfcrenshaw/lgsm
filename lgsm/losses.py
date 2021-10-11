@@ -13,7 +13,7 @@ class KLDiv(elegy.Loss):
         return -0.5 * jnp.mean((1 + logvar) - mean ** 2 - jnp.exp(logvar), axis=-1)
 
 
-class MSE(elegy.losses.MeanSquaredError):
+class PhotometryMSE(elegy.losses.MeanSquaredError):
     """Mean Square Error for photometry.
 
     Note I added a factor of 0.5 for the VAE definition, and 1/0.01 to hardcode
@@ -26,6 +26,41 @@ class MSE(elegy.losses.MeanSquaredError):
             / 0.01 ** 2
             * super().call(y_true=x[:, 1:], y_pred=y_pred["predicted_photometry"])
         )
+
+
+class ColorMSE(elegy.Loss):
+    """Mean Square Error for the colors.
+
+    Note I added a factor of 0.5 for the VAE definition, and I hardcoded
+    an error of 0.01 mags for all photometry.
+    """
+
+    def __init__(self, ref_idx: int):
+        self.ref_idx = ref_idx  # index of the reference band
+
+    def call(self, x: np.ndarray, y_pred: dict) -> np.ndarray:
+        mag_SE = (
+            1
+            / 0.01 ** 2
+            * (
+                x[..., self.ref_idx + 1]
+                - y_pred["predicted_photometry"][..., self.ref_idx]
+            )
+            ** 2
+        )
+
+        color_SE = (
+            1
+            / (2 * 0.01 ** 2)
+            * (
+                np.diff(x[:, 1:], axis=-1)
+                - np.diff(y_pred["predicted_photometry"], axis=-1)
+            )
+            ** 2
+        ).sum(axis=-1)
+
+        MSE = mag_SE + color_SE / y_pred["predicted_photometry"].shape[-1]
+        return 0.5 * MSE
 
 
 class SlopeLoss(elegy.Loss):

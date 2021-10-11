@@ -53,9 +53,13 @@ lgsm:
       KLDiv:
         use: True # bool
         params: {} # empty dict because no parameters
-      MSE:
+      PhotometryMSE:
         use: True # bool
         params: {} # empty dict because no parameters
+      ColorMSE:
+        use: False # bool
+        params:
+          ref_idx: 3 # int
       SlopeLoss:
         use: False # bool
         params:
@@ -87,7 +91,9 @@ plotting:
     plot_unit: mag # str, either mag, flambda, for fnu
     ncols_train: 2 # int, number of columns dedicated to examples from training set
     ncols_val: 2 # int, number of columns dedicated to examples from validation set
-    seed: 0 # int, random seed to select galaxies for plotting
+    galaxy_seed: 0 # int, random seed to select galaxies for plotting
+    nsamples: 10 # number of encoder samples to plot
+    encoder_seed: 0 # int, random seed for the encoder
 
     subplots_settings: # dictionary passed to plt.subplots()
       nrows: 5 # int
@@ -110,7 +116,10 @@ plotting:
     truth: # settings for plotting the model predictions
       sed_settings: # dict passed to plot_sed as plot_settings
         c: C0 # str
+        lw: 0.5 # float
+        alpha: 0.75 # float
       photometry_settings: # dict passed to plot_photometry as scatter_settings
         facecolors: C0 # str
         edgecolors: k # str
+        alpha: 0.75 # str
         zorder: 10

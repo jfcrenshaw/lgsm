@@ -39,7 +39,7 @@ idx_split = int(data.shape[0] * (1 - val_split))
 train_set, val_set = data[:idx_split], data[idx_split:]
 
 # set an rng to select random galaxies for plotting
-rng = np.random.default_rng(config["seed"])
+rng = np.random.default_rng(config["galaxy_seed"])
 
 # select random training galaxies for plotting
 ntrain = config["subplots_settings"]["nrows"] * config["ncols_train"]
@@ -66,11 +66,6 @@ amps = data[:, 1]
 redshift = data[:, 2]
 photometry = data[:, 3:]
 
-# load the trained model and make predictions
-predictions = elegy.load(model_dir).predict(
-    np.hstack((redshift.reshape(-1, 1), photometry))
-)
-
 # finally, let's load the truth data
 with open(sims_file, "rb") as file:
     sims = pickle.load(file)
@@ -80,18 +75,59 @@ with open(sims_file, "rb") as file:
 # add the simulated mags to the SEDs
 sim_mag = sim_mag[keys.astype(int)] + amps[:, None]
 
+# load the trained model
+model = elegy.load(model_dir)
+
+# load the trained model and make predictions
+predictions = elegy.load(model_dir).predict(
+    np.hstack((redshift.reshape(-1, 1), photometry))
+)
+
 # create the figure
 fig, axes = plt.subplots(**config["subplots_settings"])
 
-# loop through the axes and galaxies to make the plots
-for i, ax in enumerate(axes.flatten()):
+# sample from the model with different seeds, and make the plots
+rng = np.random.default_rng(config["encoder_seed"])
+seeds = rng.integers(int(1e12), size=config["nsamples"])
+for seed in seeds:
 
-    sed = predictions[f"sed_{sed_unit}"][i]
-    amp = predictions["amplitude"][i]
-    if sed_unit == "mag":
-        sed = amp + sed
-    else:
-        sed = amp * sed
+    # set the seed for the model
+    model.states = model.states.update(rng=elegy.RNGSeq(seed))
+    # get the new predictions
+    predictions = model.predict(np.hstack((redshift.reshape(-1, 1), photometry)))
+
+    # loop through the axes and galaxies to make the plots
+    for i, ax in enumerate(axes.flatten()):
+
+        sed = predictions[f"sed_{sed_unit}"][i]
+        amp = predictions["amplitude"][i]
+        if sed_unit == "mag":
+            sed = amp + sed
+        else:
+            sed = amp * sed
+
+        # plot the predicted sed
+        plot_sed(
+            predictions["sed_wave"],
+            sed,
+            sed_unit=sed_unit,
+            plot_unit=config["plot_unit"],
+            plot_settings=config["predicted"]["sed_settings"],
+            ax=ax,
+        )
+
+        # plot the predicted photometry if plot_unit = mag
+        if config["plot_unit"] == "mag":
+            plot_photometry(
+                predictions["predicted_photometry"][i],
+                bandpasses,
+                redshift=redshift[i],
+                scatter_settings=config["predicted"]["photometry_settings"],
+                ax=ax,
+            )
+
+# plot the true values and set axis settings
+for i, ax in enumerate(axes.flatten()):
 
     # plot the true sed
     plot_sed(
@@ -110,26 +146,6 @@ for i, ax in enumerate(axes.flatten()):
             bandpasses,
             redshift=redshift[i],
             scatter_settings=config["truth"]["photometry_settings"],
-            ax=ax,
-        )
-
-    # plot the predicted sed
-    plot_sed(
-        predictions["sed_wave"],
-        sed,
-        sed_unit=sed_unit,
-        plot_unit=config["plot_unit"],
-        plot_settings=config["predicted"]["sed_settings"],
-        ax=ax,
-    )
-
-    # plot the predicted photometry if plot_unit = mag
-    if config["plot_unit"] == "mag":
-        plot_photometry(
-            predictions["predicted_photometry"][i],
-            bandpasses,
-            redshift=redshift[i],
-            scatter_settings=config["predicted"]["photometry_settings"],
             ax=ax,
         )
 
