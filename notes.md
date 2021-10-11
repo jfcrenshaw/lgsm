@@ -4,7 +4,7 @@
 
 I talked with Kyle and realized I hadn't included the KLDivergence in my loss function!
 
-- [ ] Train with ColorMSE
+- [x] Train with ColorMSE
 - [ ] Add errors to simulations and fix loss functions so that errors aren't hard-coded
 - [ ] Implement spectral loss function
 - [ ] Make plots of latent variables

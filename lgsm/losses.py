@@ -7,10 +7,18 @@ import numpy as np
 class KLDiv(elegy.Loss):
     """Kullback-Leibler Divergence for a Gaussian distribution over latent variables."""
 
+    def __init__(self, beta: float = 1):
+        super().__init__()
+        self.beta = beta
+
     def call(self, y_pred: dict) -> np.ndarray:
         logvar = 2 * jnp.log(y_pred["latent_std"])
         mean = y_pred["latent_mean"]
-        return -0.5 * jnp.mean((1 + logvar) - mean ** 2 - jnp.exp(logvar), axis=-1)
+        return (
+            -self.beta
+            / 2
+            * jnp.mean((1 + logvar) - mean ** 2 - jnp.exp(logvar), axis=-1)
+        )
 
 
 class PhotometryMSE(elegy.losses.MeanSquaredError):
@@ -36,6 +44,7 @@ class ColorMSE(elegy.Loss):
     """
 
     def __init__(self, ref_idx: int):
+        super().__init__()
         self.ref_idx = ref_idx  # index of the reference band
 
     def call(self, x: np.ndarray, y_pred: dict) -> np.ndarray:
@@ -53,8 +62,8 @@ class ColorMSE(elegy.Loss):
             1
             / (2 * 0.01 ** 2)
             * (
-                np.diff(x[:, 1:], axis=-1)
-                - np.diff(y_pred["predicted_photometry"], axis=-1)
+                jnp.diff(x[:, 1:], axis=-1)
+                - jnp.diff(y_pred["predicted_photometry"], axis=-1)
             )
             ** 2
         ).sum(axis=-1)

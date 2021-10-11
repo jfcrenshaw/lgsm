@@ -1,0 +1,13 @@
+run_name: color_mse
+
+lgsm:
+  model_name: color_mse_model
+
+  training:
+    losses:
+      PhotometryMSE:
+        use: False
+      ColorMSE:
+        use: True
+      SlopeLoss:
+        use: True

@@ -1,4 +1,4 @@
-run_name: default
+run_name: color_mse
 sims:
   random_seed: 0
   redshifts_per_sed: 100
@@ -14,7 +14,7 @@ sims:
     - lsstz
     - lssty
 lgsm:
-  model_name: default_model
+  model_name: color_mse_model
   vae:
     encoder_layers:
       - 32
@@ -45,14 +45,14 @@ lgsm:
         params:
           beta: 1.
       PhotometryMSE:
-        use: true
+        use: false
         params: {}
       ColorMSE:
-        use: false
+        use: true
         params:
           ref_idx: 3
       SlopeLoss:
-        use: false
+        use: true
         params:
           eta: 0.01
     optimizer:
