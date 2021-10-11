@@ -1,0 +1,9 @@
+run_name: slope_loss
+
+lgsm:
+  model_name: slope_loss_model # str
+
+  training:
+    losses:
+      SlopeLoss:
+        use: true
