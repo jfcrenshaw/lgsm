@@ -29,11 +29,19 @@ class MSE(elegy.losses.MeanSquaredError):
 
 
 class SlopeLoss(elegy.Loss):
-    """Penalty on differences in neighboring bins."""
+    """Penalty on differences in neighboring bins.
+
+    I also hardcoded an error of 0.01 mags here
+    """
 
     def __init__(self, eta: float):
         super().__init__()
         self.eta = eta
 
     def call(self, y_pred: dict) -> np.ndarray:
-        return self.eta * jnp.mean(jnp.diff(y_pred["sed_mag"], axis=-1) ** 2)
+        return (
+            1
+            / 0.01 ** 2
+            * self.eta
+            * jnp.mean(jnp.diff(y_pred["sed_mag"], axis=-1) ** 2)
+        )

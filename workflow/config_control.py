@@ -145,6 +145,10 @@ def save_config(config: dict, output_path: str, template_path: str = None):
             template_config = yaml.safe_load(file)
         config = _return_ordered_config(config, template_config)
 
+    # create the output directory if it doesn't already exist
+    output_dir = Path(output_path).parent
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+
     # save the config
     with open(output_path, "w") as file:
         yaml.dump(config, file, default_flow_style=False, sort_keys=False)

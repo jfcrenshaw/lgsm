@@ -3,8 +3,8 @@ import pickle
 
 import elegy
 import jax.numpy as jnp
-import lgsm
 import optax
+from lgsm import LGSModel, losses
 
 # get the values injected to global by snakemake
 # pylint: disable=undefined-variable
@@ -19,12 +19,11 @@ with open(input_file, "rb") as file:
     data = jnp.array(data[:, 2:])
 
 # build the list of loss functions
-losses = []
-for loss_name, loss_settings in config["training"].pop("losses").items():
-    if loss_settings is True:
-        losses.append(getattr(lgsm.losses, loss_name)())
-    elif isinstance(loss_settings, dict):
-        losses.append(getattr(lgsm.losses, loss_name)(**loss_settings))
+losses = [
+    getattr(losses, loss_name)(**loss_settings["params"])
+    for loss_name, loss_settings in config["training"].pop("losses").items()
+    if loss_settings["use"]
+]
 
 # get the optimizer
 optimizer_name, optimizer_params = config["training"].pop("optimizer").popitem()
@@ -32,7 +31,7 @@ optimizer = getattr(optax, optimizer_name)(**optimizer_params)
 
 # build the elegy model
 model = elegy.Model(
-    module=lgsm.LGSModel(
+    module=LGSModel(
         data.mean(axis=0),
         data.std(axis=0),
         **config["vae"],

@@ -50,9 +50,16 @@ lgsm:
 
   training:
     losses:
-      KLDiv: True # bool
-      MSE: True # bool
-      SlopeLoss: False # False or dict {eta: float}
+      KLDiv:
+        use: True # bool
+        params: {} # empty dict because no parameters
+      MSE:
+        use: True # bool
+        params: {} # empty dict because no parameters
+      SlopeLoss:
+        use: False # bool
+        params:
+          eta: 1.e-2 # float
 
     optimizer:
       adam:
