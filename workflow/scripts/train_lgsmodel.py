@@ -9,40 +9,34 @@ from lgsm import LGSModel, losses, sed_utils
 
 # get the values injected to global by snakemake
 # pylint: disable=undefined-variable
-training_data_file = snakemake.input[1]
-sims_file = snakemake.input[2]
+training_data = snakemake.input[1]
 model_dir = snakemake.output[0]
 config = snakemake.config["lgsm"]
 # pylint: enable=undefined-variable
 
 # load the data
-with open(training_data_file, "rb") as file:
-    data = pickle.load(file)["data"]
-    keys = jnp.array(data[:, 0]).astype(int)
-    amps = jnp.array(data[:, 1])[:, None]
-    data = jnp.array(data[:, 2:])
+with open(training_data, "rb") as file:
+    sims = pickle.load(file)
+    redshift = sims["redshift"]
+    photometry = sims["photometry"]
+    training_data = jnp.hstack((redshift, photometry))
 
-# if we are using SpectralLoss, we need to load the simulations
+# if we are using SpectralLoss, we need to load the true SEDs associated
+# with the photometry simulations
 if config["training"]["losses"]["SpectralLoss"]["use"]:
 
-    # load the sims, in case we are using SpectralLoss
-    with open(sims_file, "rb") as file:
-        sims = pickle.load(file)
-        sim_wave = sims["wave"]
-        sim_mag = sims["sed_mag"]
+    true_seds = sims["sed_mag"]
+    true_wave = sims["sed_wave"]
 
-    # get the relevant SEDs and add the simulated amplitudes
-    sim_mag = sim_mag[keys] + amps
-
-    # down-sample the simulations to the resolution of the predicted latent SEDs
+    # down-sample the true SEDs to the resolution of the predicted latent SEDs
     sed_wave = sed_utils.setup_wave_grid(
         config["vae"]["wave_min"], config["vae"]["wave_max"], config["vae"]["wave_bins"]
     )
-    y = jax.vmap(lambda mags: jnp.interp(sed_wave, sim_wave, mags))(sim_mag)
+    y = jax.vmap(lambda mags: jnp.interp(sed_wave, true_wave, mags))(true_seds)
 
 # otherwise, create a fake y
 else:
-    y = jnp.ones(data.shape[0])
+    y = jnp.ones(training_data.shape[0])
 
 # build the list of loss functions
 losses = [
@@ -58,8 +52,8 @@ optimizer = getattr(optax, optimizer_name)(**optimizer_params)
 # build the elegy model
 model = elegy.Model(
     module=LGSModel(
-        data.mean(axis=0),
-        data.std(axis=0),
+        training_data.mean(axis=0),
+        training_data.std(axis=0),
         **config["vae"],
         **config["physics_layer"],
     ),
@@ -70,11 +64,11 @@ model = elegy.Model(
 # train the model
 # currently y and sample weight are dummies to allow validation_split to work
 history = model.fit(
-    x=data,
+    x=training_data,
     verbose=2,
     shuffle=False,
     y=y,
-    sample_weight=jnp.ones(data.shape),
+    sample_weight=jnp.ones(training_data.shape),
     **config["training"],
 )
 

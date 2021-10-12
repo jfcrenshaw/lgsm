@@ -6,7 +6,7 @@ I talked with Kyle and realized I hadn't included the KLDivergence in my loss fu
 
 - [x] Train with ColorMSE
 - [ ] Add errors to simulations and fix loss functions so that errors aren't hard-coded
-- [ ] Implement spectral loss function
+- [x] Implement spectral loss function
 - [ ] Make plots of latent variables
 - [ ] Move over to InfoVAE (also [read the paper](https://arxiv.org/pdf/1706.02262.pdf))
     ^ Maybe use params similar to what Stephen used in his paper

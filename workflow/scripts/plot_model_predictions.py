@@ -3,19 +3,17 @@ import pickle
 
 import elegy
 import matplotlib.pyplot as plt
-import numpy as np
+from jax import vmap, random
+import jax.numpy as jnp
 from lgsm.plotting import plot_photometry, plot_sed
 
 # get the values injected to global by snakemake
 # pylint: disable=undefined-variable
 model_dir = snakemake.input[1]
-data_file = snakemake.input[2]
-sims_file = snakemake.input[3]
+training_data = snakemake.input[2]
 output_file = snakemake.output[0]
 config = snakemake.config["plotting"]["model_predictions"]
-val_split = snakemake.config["lgsm"]["training"]["validation_split"]
-sed_unit = snakemake.config["lgsm"]["vae"]["sed_unit"]
-bandpasses = snakemake.config["lgsm"]["physics_layer"]["bandpasses"]
+lgsm_config = snakemake.config["lgsm"]
 # pylint: enable=undefined-variable
 
 
@@ -28,77 +26,73 @@ if "ncols" in config["subplots_settings"]:
     )
 
 # calculate ncols from the training and validation ncols
-config["subplots_settings"]["ncols"] = config["ncols_train"] + config["ncols_val"]
+nrows = config["subplots_settings"]["nrows"]
+ncols_train = config["ncols_train"]
+ncols_val = config["ncols_val"]
+ncols = ncols_train + ncols_val
+config["subplots_settings"]["ncols"] = ncols
 
 # load the data
-with open(data_file, "rb") as file:
-    data = pickle.load(file)["data"]
+with open(training_data, "rb") as file:
+    sims = pickle.load(file)
 
-# get the training and validation sets
-idx_split = int(data.shape[0] * (1 - val_split))
-train_set, val_set = data[:idx_split], data[idx_split:]
+    # load the simulated photometry and redshifts
+    redshift = jnp.array(sims["redshift"])
+    photometry = jnp.array(sims["photometry"])
 
-# set an rng to select random galaxies for plotting
-rng = np.random.default_rng(config["galaxy_seed"])
+    # load the true SEDs
+    true_wave = jnp.array(sims["sed_wave"])
+    true_seds = jnp.array(sims["sed_mag"])
 
-# select random training galaxies for plotting
-ntrain = config["subplots_settings"]["nrows"] * config["ncols_train"]
-train_set = rng.choice(train_set, size=ntrain, replace=False)
+# get the split of the training and validation sets
+val_split = lgsm_config["training"]["validation_split"]
+idx_split = int(redshift.size * (1 - val_split))
 
-# select random validation galaxies for plotting
-nval = config["subplots_settings"]["nrows"] * config["ncols_val"]
-val_set = rng.choice(val_set, size=nval, replace=False)
+# select random sets of the training and validation sets to plot
+PRNGKey = random.PRNGKey(config["galaxy_seed"])
+train_key, val_key = random.split(PRNGKey)
+
+ntrain = nrows * ncols_train
+train_idx = random.randint(train_key, shape=(ntrain,), minval=0, maxval=idx_split)
+
+nval = nrows * ncols_val
+val_idx = random.randint(val_key, shape=(nval,), minval=idx_split, maxval=redshift.size)
 
 # concatenate the sets
-data = np.concatenate((train_set, val_set))
+idx = jnp.concatenate((train_idx, val_idx))
 
-# now we will interleave the sets so that training sets and validation sets
-# are sorted by column instead of row
-nrows = config["subplots_settings"]["nrows"]
-ncols = config["subplots_settings"]["ncols"]
-data = data.reshape(ncols, nrows, -1)
-data = np.transpose(data, (1, 0, 2))
-data = data.reshape(nrows * ncols, -1)
+# now we will order the indices so that the training and validation sets
+# will be sorted by column instead of row
+idx = idx.reshape(ncols, nrows).T.flatten()
 
-# pull out the columns in the data
-keys = data[:, 0]
-amps = data[:, 1]
-redshift = data[:, 2]
-photometry = data[:, 3:]
+# pull out the values we will plot
+redshift = redshift[idx]
+photometry = photometry[idx]
+true_seds = true_seds[idx]
 
-# finally, let's load the truth data
-with open(sims_file, "rb") as file:
-    sims = pickle.load(file)
-    sim_wave = sims["wave"]
-    sim_mag = sims["sed_mag"]
-
-# add the simulated amplitudes to the SEDs
-sim_mag = sim_mag[keys.astype(int)] + amps[:, None]
+# get the list of bandpasses
+bandpasses = lgsm_config["physics_layer"]["bandpasses"]
 
 # load the trained model
 model = elegy.load(model_dir)
-
-# load the trained model and make predictions
-predictions = elegy.load(model_dir).predict(
-    np.hstack((redshift.reshape(-1, 1), photometry))
-)
 
 # create the figure
 fig, axes = plt.subplots(**config["subplots_settings"])
 
 # sample from the model with different seeds, and make the plots
-rng = np.random.default_rng(config["encoder_seed"])
-seeds = rng.integers(int(1e12), size=config["nsamples"])
+PRNGKey = random.PRNGKey(config["encoder_seed"])
+seeds = random.split(PRNGKey, num=config["nsamples"])
 for seed in seeds:
 
     # set the seed for the model
     model.states = model.states.update(rng=elegy.RNGSeq(seed))
     # get the new predictions
-    predictions = model.predict(np.hstack((redshift.reshape(-1, 1), photometry)))
+    predictions = model.predict(jnp.hstack((redshift.reshape(-1, 1), photometry)))
 
     # loop through the axes and galaxies to make the plots
     for i, ax in enumerate(axes.flatten()):
 
+        sed_unit = lgsm_config["vae"]["sed_unit"]
         sed = predictions[f"sed_{sed_unit}"][i]
         amp = predictions["amplitude"][i]
         if sed_unit == "mag":
@@ -126,14 +120,18 @@ for seed in seeds:
                 ax=ax,
             )
 
+# downsample the true SEDs
+true_seds = vmap(lambda mags: jnp.interp(predictions["sed_wave"], true_wave, mags))(
+    true_seds
+)
 # plot the true values and set axis settings
 for i, ax in enumerate(axes.flatten()):
 
     # plot the true sed
     plot_sed(
-        sim_wave,
-        sim_mag[i],
-        sed_unit=sed_unit,
+        predictions["sed_wave"],
+        true_seds[i],
+        sed_unit="mag",
         plot_unit=config["plot_unit"],
         plot_settings=config["truth"]["sed_settings"],
         ax=ax,

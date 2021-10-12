@@ -5,14 +5,10 @@ lgsm:
 
   training:
     losses:
-      ColorMSE:
+      PhotometryMSE:
         use: True # bool
-        params:
-          ref_idx: 3 # int
       SpectralLoss:
         use: True # bool
         params:
           frac: 0.01 # float
           eta: 1.e+2 # float
-
-    epochs: 100

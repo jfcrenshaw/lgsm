@@ -48,7 +48,6 @@ rule train_LGSModel:
     input:
         config_flags.flag("lgsm"),
         training_data,
-        "data/raw/simulated_seds.pkl",
     output:
         directory(model_dir),
     script:
@@ -70,7 +69,6 @@ rule plot_model_predictions:
         config_flags.flag("plotting", "model_predictions"),
         model_dir,
         training_data,
-        "data/raw/simulated_seds.pkl",
     output:
         model_predictions,
     script:

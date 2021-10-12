@@ -114,6 +114,7 @@ plotting:
     predicted: # settings for plotting the model predictions
       sed_settings: # dict passed to plot_sed as plot_settings
         c: C1 # str
+        alpha: 0.25
       photometry_settings: # dict passed to plot_photometry as scatter_settings
         facecolors: C1 # str
         edgecolors: k # str
@@ -122,7 +123,7 @@ plotting:
     truth: # settings for plotting the model predictions
       sed_settings: # dict passed to plot_sed as plot_settings
         c: C0 # str
-        lw: 0.5 # float
+        lw: 1 # float
         alpha: 0.75 # float
       photometry_settings: # dict passed to plot_photometry as scatter_settings
         facecolors: C0 # str

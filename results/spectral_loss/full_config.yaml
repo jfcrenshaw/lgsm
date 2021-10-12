@@ -48,7 +48,7 @@ lgsm:
         use: true
         params: {}
       ColorMSE:
-        use: true
+        use: false
         params:
           ref_idx: 3
       SlopeLoss:
@@ -64,7 +64,7 @@ lgsm:
       adam:
         learning_rate: 0.001
     batch_size: 128
-    epochs: 100
+    epochs: 300
     validation_split: 0.2
 plotting:
   model_losses:
@@ -98,6 +98,7 @@ plotting:
     predicted:
       sed_settings:
         c: C1
+        alpha: 0.25
       photometry_settings:
         facecolors: C1
         edgecolors: k
@@ -105,7 +106,7 @@ plotting:
     truth:
       sed_settings:
         c: C0
-        lw: 0.5
+        lw: 1
         alpha: 0.75
       photometry_settings:
         facecolors: C0

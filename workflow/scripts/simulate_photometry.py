@@ -26,22 +26,25 @@ mags = simulated_seds["sed_mag"]
 
 # how many duplicates of each should we train?
 N = config["redshifts_per_sed"]
-# these keys allow us to map simulated photometry back to the true SED
-keys = jnp.repeat(jnp.arange(mags.shape[0]), N).reshape(-1, 1)
 # make duplicates of each SED
 mags = jnp.tile(mags, N).reshape(-1, mags.shape[1])
 
-# generate random redshifts and amplitudes for the SEDs
+# generate the random keys used below
 PRNGKey = random.PRNGKey(config["random_seed"])
-zs_key, amps_key = random.split(PRNGKey)
-zs = random.uniform(
-    key=zs_key,
+permutation_key, redshift_key, amplitude_key = random.split(PRNGKey, num=3)
+
+# shuffle the SEDs
+mags = random.permutation(permutation_key, mags)
+# generate random redshifts
+redshifts = zs = random.uniform(
+    key=redshift_key,
     shape=(mags.shape[0], 1),
     minval=config["min_redshift"],
     maxval=config["max_redshift"],
 )
-amps = random.uniform(
-    key=amps_key,
+# generate random amplitudes
+amplitudes = random.uniform(
+    key=amplitude_key,
     shape=(mags.shape[0], 1),
     minval=config["min_mag"],
     maxval=config["max_mag"],
@@ -56,25 +59,23 @@ PL = PhysicsLayer(
 )
 
 # simulate the photometry
-photometry = PL.call(mags, amps, zs)["predicted_photometry"]
-
-# stack all the data to save
-data = jnp.hstack((keys, amps, zs, photometry))
-
-# randomly shuffle the data
-data = random.permutation(PRNGKey, data)
+photometry = PL.call(mags, amplitudes, redshifts)["predicted_photometry"]
 
 # save the simulations in a dictionary
 bandpasses_str = ", ".join(config["bandpasses"])
 save_dict = {
     "README": (
-        "Simulated photometry for the SEDs in data/raw/simulated_seds.pkl. "
-        f"The columns are key, amplitude, redshift, {bandpasses_str}. "
-        "The key tells you which SED in simulated_seds.pkl was used to "
-        "generate the photometry, while amps/zs are the amplitudes/redshifts "
-        "they were simulated at."
+        f"Simulated photometry for the SEDs in {input_file}. "
+        "'sed_mag' is an array of the true SEDs in AB mag. "
+        "'sed_wave' is an array of the corresponding wavelength grid in Angstroms. "
+        "'photometry' is the photometry in AB mags, "
+        f"calculated for the bands {bandpasses_str}. "
+        "The photometry was calculated at the redshifts stored in 'redshift'."
     ),
-    "data": data,
+    "sed_wave": wave,
+    "sed_mag": mags + amplitudes,
+    "redshift": redshifts,
+    "photometry": photometry,
 }
 
 with open(output_file, "wb") as file:
