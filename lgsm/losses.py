@@ -89,3 +89,21 @@ class SlopeLoss(elegy.Loss):
             * self.eta
             * jnp.mean(jnp.diff(y_pred["sed_mag"], axis=-1) ** 2)
         )
+
+
+class SpectralLoss(elegy.Loss):
+    """Calculates loss w.r.t. latent SEDs, assuming a fraction of true
+    SEDs are known exactly.
+    """
+
+    def __init__(self, eta: float, frac: int):
+        super().__init__()
+        self.eta = eta
+        self.frac = frac
+
+    def call(self, y_true: np.ndarray, y_pred: dict) -> np.ndarray:
+        N = int(self.frac * y_pred["amplitude"].shape[0])
+        assert N > 0, "With this batch size, the given frac results in no spectra."
+        true_sed = y_true[:N]
+        pred_sed = y_pred["amplitude"][:N] + y_pred["sed_mag"][:N]
+        return self.eta * jnp.mean((true_sed - pred_sed) ** 2)

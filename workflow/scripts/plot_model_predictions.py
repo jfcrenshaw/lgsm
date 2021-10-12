@@ -72,7 +72,7 @@ with open(sims_file, "rb") as file:
     sim_wave = sims["wave"]
     sim_mag = sims["sed_mag"]
 
-# add the simulated mags to the SEDs
+# add the simulated amplitudes to the SEDs
 sim_mag = sim_mag[keys.astype(int)] + amps[:, None]
 
 # load the trained model

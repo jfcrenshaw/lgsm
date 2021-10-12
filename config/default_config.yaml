@@ -65,6 +65,11 @@ lgsm:
         use: False # bool
         params:
           eta: 1.e-2 # float
+      SpectralLoss:
+        use: False # bool
+        params:
+          frac: 0.01 # float
+          eta: 1.e-1 # float
 
     optimizer:
       adam:
@@ -103,8 +108,8 @@ plotting:
       dpi: 120 # int
 
     ax_settings: # dictionary passed to ax.set()
-      xlabel: Wavelength (AA)
-      ylabel: AB Magnitude
+      xlabel: Wavelength (AA) # str
+      ylabel: AB Magnitude # str
 
     predicted: # settings for plotting the model predictions
       sed_settings: # dict passed to plot_sed as plot_settings
@@ -112,7 +117,7 @@ plotting:
       photometry_settings: # dict passed to plot_photometry as scatter_settings
         facecolors: C1 # str
         edgecolors: k # str
-        zorder: 10
+        zorder: 10 # int
 
     truth: # settings for plotting the model predictions
       sed_settings: # dict passed to plot_sed as plot_settings
@@ -123,4 +128,4 @@ plotting:
         facecolors: C0 # str
         edgecolors: k # str
         alpha: 0.75 # str
-        zorder: 10
+        zorder: 10 # int

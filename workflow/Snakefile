@@ -9,7 +9,7 @@ configfile: default_config
 
 
 # set the names of outputs
-model_loc = f"models/{config['lgsm']['model_name']}"
+model_dir = f"models/{config['lgsm']['model_name']}"
 results_dir = f"results/{config['run_name']}"
 training_data = "data/processed/simulated_photometry.pkl"
 model_losses = f"{results_dir}/model_losses.{config['plotting']['model_losses']['format']}"
@@ -29,7 +29,7 @@ onstart:
 rule all:
     input:
         "data/processed/simulated_photometry.pkl",
-        model_loc,
+        model_dir,
         model_losses,
         model_predictions,
 
@@ -48,8 +48,9 @@ rule train_LGSModel:
     input:
         config_flags.flag("lgsm"),
         training_data,
+        "data/raw/simulated_seds.pkl",
     output:
-        directory(model_loc),
+        directory(model_dir),
     script:
         "scripts/train_lgsmodel.py"
 
@@ -57,7 +58,7 @@ rule train_LGSModel:
 rule plot_model_losses:
     input:
         config_flags.flag("plotting", "model_losses"),
-        model_loc,
+        model_dir,
     output:
         model_losses,
     script:
@@ -67,7 +68,7 @@ rule plot_model_losses:
 rule plot_model_predictions:
     input:
         config_flags.flag("plotting", "model_predictions"),
-        model_loc,
+        model_dir,
         training_data,
         "data/raw/simulated_seds.pkl",
     output:

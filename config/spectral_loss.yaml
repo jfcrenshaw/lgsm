@@ -1,0 +1,18 @@
+run_name: spectral_loss
+
+lgsm:
+  model_name: spectral_loss_model
+
+  training:
+    losses:
+      ColorMSE:
+        use: True # bool
+        params:
+          ref_idx: 3 # int
+      SpectralLoss:
+        use: True # bool
+        params:
+          frac: 0.01 # float
+          eta: 1.e+2 # float
+
+    epochs: 100

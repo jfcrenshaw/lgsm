@@ -55,6 +55,11 @@ lgsm:
         use: false
         params:
           eta: 0.01
+      SpectralLoss:
+        use: false
+        params:
+          frac: 0.01
+          eta: 1.e-1
     optimizer:
       adam:
         learning_rate: 0.001
