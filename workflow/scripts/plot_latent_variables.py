@@ -1,9 +1,9 @@
 """Plots the latent variables of the LGS Model."""
-import matplotlib.pyplot as plt
+import pickle
+
 import corner
 import elegy
 import jax.numpy as jnp
-from jax import random
 import numpy as np
 
 # get the values injected to global by snakemake

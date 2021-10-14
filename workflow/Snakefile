@@ -22,6 +22,7 @@ full_config = f"{results_dir}/full_config.yaml"
 # set up the config flags
 config_flags = ConfigFlags(config, full_config)
 
+
 # save the current config
 onstart:
     save_config(config, full_config, default_config)
@@ -29,11 +30,10 @@ onstart:
 
 rule all:
     input:
-        "data/processed/simulated_photometry.pkl",
         model_dir,
         model_losses,
         model_predictions,
-        latent_variables
+        latent_variables,
 
 
 rule simulate_photometry:
@@ -75,6 +75,7 @@ rule plot_model_predictions:
         model_predictions,
     script:
         "scripts/plot_model_predictions.py"
+
 
 rule plot_latent_variables:
     input:

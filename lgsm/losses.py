@@ -1,6 +1,5 @@
 """Losses for training LGS Models."""
 import elegy
-from jax._src.random import PRNGKey
 import jax.numpy as jnp
 import numpy as np
 from jax import random
