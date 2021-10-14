@@ -137,6 +137,7 @@ dmypy.json
 # ignore my trash directory
 .all_trash
 
-# ignore the processed data
-# this is often large and can be re-created
-#.data/processed
+# ignore the data folder, as these files are often large. 
+# I will instead store raw data files in Github releases,
+# where they can be easily downloaded
+.data

@@ -8,6 +8,8 @@ This project was started in another repo.
 I ported that work over here, where I am now handling dependencies with poetry, and controlling the workflow with snakemake.
 
 To install, clone this repo, and from the root directory, run `poetry install`.
+Then download the data files stored in the Github releases.
+
 If you want to enable GPU support for Jax with CUDA, run
 
 ```bash
