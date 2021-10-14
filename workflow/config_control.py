@@ -60,8 +60,10 @@ class ConfigFlagger:
             # try to get the new config value for this chain of keys
             try:
                 new_val = self._get_nested_value(self._new_config, keys)
-            except KeyError:
-                raise KeyError("This chain of keys is not in your new config.")
+            except KeyError as err:
+                raise ValueError(
+                    f"The chain of keys {keys} is not in your new config."
+                ) from err
 
             # try to get the reference config value for this chain of keys
             try:
