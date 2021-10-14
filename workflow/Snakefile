@@ -8,13 +8,18 @@ default_config = "config/default_config.yaml"
 configfile: default_config
 
 
+# for now, hardcode the name of the training data
+training_data = "data/processed/simulated_photometry.pkl"
+
+
 # set the names of outputs
 model_dir = f"models/{config['lgsm']['model_name']}"
 results_dir = f"results/{config['run_name']}"
-training_data = "data/processed/simulated_photometry.pkl"
-model_losses = f"{results_dir}/model_losses.{config['plotting']['model_losses']['format']}"
-model_predictions = f"{results_dir}/model_predictions.{config['plotting']['model_predictions']['format']}"
-latent_variables = f"{results_dir}/latent_variables.{config['plotting']['latent_variables']['format']}"
+figures = {
+    name: f"{results_dir}/{name}.{settings['format']}" 
+    for name, settings in config["plotting"].items()
+    if name != "rcParams"
+}
 
 
 # set path to the full config to be checked against and then saved
@@ -31,9 +36,7 @@ onstart:
 rule all:
     input:
         model_dir,
-        model_losses,
-        model_predictions,
-        latent_variables,
+        list(figures.values()),
 
 
 rule simulate_photometry:
@@ -58,31 +61,34 @@ rule train_LGSModel:
 
 rule plot_model_losses:
     input:
+        config_flagger.flag("plotting", "rcParams"),
         config_flagger.flag("plotting", "model_losses"),
         model_dir,
     output:
-        model_losses,
+        figures["model_losses"],
     script:
         "scripts/plot_model_losses.py"
 
 
 rule plot_model_predictions:
     input:
+        config_flagger.flag("plotting", "rcParams"),
         config_flagger.flag("plotting", "model_predictions"),
         model_dir,
         training_data,
     output:
-        model_predictions,
+        figures["model_predictions"],
     script:
         "scripts/plot_model_predictions.py"
 
 
 rule plot_latent_variables:
     input:
+        config_flagger.flag("plotting", "rcParams"),
         config_flagger.flag("plotting", "latent_variables"),
         model_dir,
         training_data,
     output:
-        latent_variables,
+        figures["latent_variables"],
     script:
         "scripts/plot_latent_variables.py"

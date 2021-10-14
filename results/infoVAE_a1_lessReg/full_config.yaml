@@ -6,6 +6,7 @@ sims:
   max_redshift: 2.0
   min_mag: 18.0
   max_mag: 22.0
+  photometric_err: 0.0
   bandpasses:
   - lsstu
   - lsstg
@@ -73,6 +74,7 @@ lgsm:
     epochs: 300
     validation_split: 0.2
 plotting:
+  rcParams: {}
   model_losses:
     format: png
     subplots_settings:
@@ -116,3 +118,6 @@ plotting:
         edgecolors: k
         alpha: 0.75
         zorder: 10
+  latent_variables:
+    format: png
+    test: false

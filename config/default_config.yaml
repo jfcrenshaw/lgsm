@@ -13,7 +13,7 @@ sims:
   max_redshift: 2. # float
   min_mag: 18. # float
   max_mag: 22. # float
-  photometric_err: 0.05. # float
+  photometric_err: 0. # float
   bandpasses: # Sequence[str]
     - lsstu
     - lsstg
@@ -90,6 +90,8 @@ lgsm:
 # settings for plotting
 # ----------------------
 plotting:
+  rcParams: {} # currently an empty dictionary
+
   model_losses:
     format: png # str, e.g. png, pdf, svg, etc.
     subplots_settings: # dictionary passed to plt.subplots()

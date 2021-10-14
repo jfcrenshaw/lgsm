@@ -2,18 +2,20 @@
 import pickle
 
 import elegy
-import matplotlib.pyplot as plt
-from jax import vmap, random
 import jax.numpy as jnp
+import matplotlib.pyplot as plt
+from jax import random, vmap
 from lgsm.plotting import plot_photometry, plot_sed
 
-# get the values injected to global by snakemake
 # pylint: disable=undefined-variable
-model_dir = snakemake.input[1]
-training_data = snakemake.input[2]
+# get the values injected to global by snakemake
+model_dir = snakemake.input[2]
+training_data = snakemake.input[3]
 output_file = snakemake.output[0]
 config = snakemake.config["plotting"]["model_predictions"]
 lgsm_config = snakemake.config["lgsm"]
+# set the rcParams
+plt.rcParams.update(snakemake.config["plotting"]["rcParams"])
 # pylint: enable=undefined-variable
 
 
