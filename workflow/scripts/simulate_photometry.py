@@ -31,7 +31,7 @@ mags = jnp.tile(mags, N).reshape(-1, mags.shape[1])
 
 # generate the random keys used below
 PRNGKey = random.PRNGKey(config["random_seed"])
-permutation_key, redshift_key, amplitude_key = random.split(PRNGKey, num=3)
+permutation_key, redshift_key, amplitude_key, noise_key = random.split(PRNGKey, num=4)
 
 # shuffle the SEDs
 mags = random.permutation(permutation_key, mags)
@@ -60,6 +60,10 @@ PL = PhysicsLayer(
 
 # simulate the photometry
 photometry = PL.call(mags, amplitudes, redshifts)["predicted_photometry"]
+
+# add the noise
+noise = config["photometric_err"] * random.normal(noise_key, shape=photometry.shape)
+photometry = photometry + noise
 
 # save the simulations in a dictionary
 bandpasses_str = ", ".join(config["bandpasses"])

@@ -2,13 +2,13 @@
 from functools import reduce
 from pathlib import Path
 from shutil import rmtree
-from typing import Union
+from typing import Any, Union
 
 import yaml
-from snakemake.io import ancient, AnnotatedString
+from snakemake.io import AnnotatedString, ancient
 
 
-class ConfigFlags:
+class ConfigFlagger:
     """Controls flagging the config file so that if sections of the config
     are changed, the corresponding rules will be re-run.
     """
@@ -25,10 +25,6 @@ class ConfigFlags:
             The path to the old config file.
         """
 
-        # set all_lowered and all_raised to False
-        self._all_lowered = False
-        self._all_raised = False
-
         # save the new config
         self._new_config = new_config
 
@@ -42,83 +38,65 @@ class ConfigFlags:
         # create directory to hold the flags
         Path(self._flag_path).mkdir(exist_ok=True)
 
+        # set all_lowered to False
+        self._all_lowered = False
+
     @staticmethod
-    def _get_nested_value(dictionary, keys):
+    def _get_nested_value(dictionary: dict, keys: tuple) -> Any:
         """Get value from nested dictionary keys."""
         return reduce(lambda d, k: d[k], keys, dictionary)
 
-    def _raised_flag(self, keys: tuple) -> str:
-        """Returns the name of a raised flag built from the given keys."""
-        return f"{self._flag_path}/{'_'.join(keys)}_changed"
-
-    def _lowered_flag(self) -> Union[AnnotatedString, list]:
-        """Returns the name of the lowered flag.
-
-        The lowered flag is ancient so that snakemake considers the it older
-        than all outputs, and thus the rule is not triggered.
+    def _identical_config_vals(self, keys: tuple) -> bool:
+        """Compare the value for this chain of keys in the new and reference
+        config to see if they're identical.
         """
-        return ancient(f"{self._flag_path}/_lowered_flag")
 
-    def flag(self, *keys: str) -> Union[str, list]:
-        """Set a flag for the given config key(s) in a snakemake rule input."""
+        # if there is no reference config, the configs aren't identical
+        if self._ref_config is None:
+            return False
 
-        # if all_raised() has been called or there is no ref_config, raise the flag
-        if self._all_raised or self._ref_config is None:
-            flag_file = self._raised_flag(keys)
-
-        # else if all_lowered() has been called, lower the flag
-        elif self._all_lowered:
-            flag_file = self._lowered_flag()
-
-        # otherwise, we will check the new config against the reference config
+        # otherwise we will compare the value for this chain of keys
         else:
             # try to get the new config value for this chain of keys
             try:
                 new_val = self._get_nested_value(self._new_config, keys)
             except KeyError:
-                raise KeyError("This chain of keys is not in your new config!")
+                raise KeyError("This chain of keys is not in your new config.")
 
             # try to get the reference config value for this chain of keys
             try:
                 ref_val = self._get_nested_value(self._ref_config, keys)
-            # if the chain of keys isn't in the reference, we default to None
             except KeyError:
-                ref_val = None
+                return False
 
-            # compare the config values...
-            # if they're the same, lower the flag
-            if new_val == ref_val:
-                flag_file = self._lowered_flag()
-            # if something has changed, raise the flag
-            else:
-                flag_file = self._raised_flag(keys)
+            # if we got a value from both configs, compare them
+            return new_val == ref_val
 
-        # now, create the flag file
+    def flag(self, *keys: str) -> Union[AnnotatedString, str, list]:
+        """Set a flag for the given config key(s) in a snakemake rule input."""
+
+        # determine whether to raise or lower the flag
+        if self._all_lowered or self._identical_config_vals(keys):
+            # flag is ancient so snakemake considers it older than outputs
+            flag_file = ancient(f"{self._flag_path}/{'_'.join(keys)}_unchanged")
+        else:
+            # flag is regular string so snakemake considers it newer than outputs
+            flag_file = f"{self._flag_path}/{'_'.join(keys)}_changed"
+
+        # create the flag file
         Path(str(flag_file)).touch()
+
         # and return the flag to the snakemake rule input
         return flag_file
 
     def lower_all(self):
         """Lower all the flags, regardless of config changes."""
         self._all_lowered = True
-        self._all_raised = False
-
-    def raise_all(self):
-        """Raise all the flags, regardless of config changes."""
-        self._all_raised = True
-        self._all_lowered = False
-
-    def cleanup(self):
-        """Remove all the flag files.
-
-        Note this will automatically be called by the __del__ method during
-        garbage collection. You likely don't need to explicitly call it yourself.
-        """
-        rmtree(self._flag_path)
 
     def __del__(self):
-        """Call cleanup() during garbage collection."""
-        self.cleanup()
+        """Remove all the flag files during garbage collection."""
+        if Path(self._flag_path).exists():
+            rmtree(self._flag_path)
 
 
 def _return_ordered_config(unordered_config: dict, template_config: dict) -> dict:

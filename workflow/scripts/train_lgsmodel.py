@@ -62,13 +62,13 @@ model = elegy.Model(
 )
 
 # train the model
-# currently y and sample weight are dummies to allow validation_split to work
+# sample weight is a dummy to allow validation_split to work
 history = model.fit(
     x=training_data,
-    verbose=2,
-    shuffle=False,
     y=y,
     sample_weight=jnp.ones(training_data.shape),
+    verbose=2,
+    shuffle=False,
     **config["training"],
 )
 

@@ -136,3 +136,7 @@ dmypy.json
 
 # ignore my trash directory
 .all_trash
+
+# ignore the processed data
+# this is often large and can be re-created
+#.data/processed

@@ -1,4 +1,4 @@
-from config_control import ConfigFlags, save_config
+from config_control import ConfigFlagger, save_config
 
 # the default config
 # you can specify a new config by running
@@ -19,8 +19,8 @@ latent_variables = f"{results_dir}/latent_variables.{config['plotting']['latent_
 
 # set path to the full config to be checked against and then saved
 full_config = f"{results_dir}/full_config.yaml"
-# set up the config flags
-config_flags = ConfigFlags(config, full_config)
+# set up the config flagger
+config_flagger = ConfigFlagger(config, full_config)
 
 
 # save the current config
@@ -38,7 +38,7 @@ rule all:
 
 rule simulate_photometry:
     input:
-        config_flags.flag("sims"),
+        config_flagger.flag("sims"),
         "data/raw/simulated_seds.pkl",
     output:
         "data/processed/simulated_photometry.pkl",
@@ -48,7 +48,7 @@ rule simulate_photometry:
 
 rule train_LGSModel:
     input:
-        config_flags.flag("lgsm"),
+        config_flagger.flag("lgsm"),
         training_data,
     output:
         directory(model_dir),
@@ -58,7 +58,7 @@ rule train_LGSModel:
 
 rule plot_model_losses:
     input:
-        config_flags.flag("plotting", "model_losses"),
+        config_flagger.flag("plotting", "model_losses"),
         model_dir,
     output:
         model_losses,
@@ -68,7 +68,7 @@ rule plot_model_losses:
 
 rule plot_model_predictions:
     input:
-        config_flags.flag("plotting", "model_predictions"),
+        config_flagger.flag("plotting", "model_predictions"),
         model_dir,
         training_data,
     output:
@@ -79,7 +79,7 @@ rule plot_model_predictions:
 
 rule plot_latent_variables:
     input:
-        config_flags.flag("plotting", "latent_variables"),
+        config_flagger.flag("plotting", "latent_variables"),
         model_dir,
         training_data,
     output:
