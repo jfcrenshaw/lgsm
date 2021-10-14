@@ -34,4 +34,10 @@ import jax
 jax.config.update('jax_platform_name', 'cpu')
 ```
 
+If that doesn't work, try
+
+```bash
+export CUDA_VISIBLE_DEVICES=-1
+```
+
 Note that if you run jax on GPU in multiple Jupyter notebooks simultaneously, you may get `RuntimeError: cuSolver internal error`. Read more [here](https://github.com/google/jax/issues/4497) and [here](https://jax.readthedocs.io/en/latest/gpu_memory_allocation.html).

@@ -1,4 +1,4 @@
-run_name: spectral_loss
+run_name: infoVAE_a1_lessReg_colorMSE
 sims:
   random_seed: 0
   redshifts_per_sed: 100
@@ -14,7 +14,7 @@ sims:
   - lsstz
   - lssty
 lgsm:
-  model_name: spectral_loss_model
+  model_name: infoVAE_a1_lessReg_colorMSE_model
   vae:
     encoder_layers:
     - 32
@@ -41,20 +41,20 @@ lgsm:
   training:
     losses:
       KLDiv:
-        use: true
+        use: false
         params:
           alpha: 0.0
       MMD:
-        use: false
+        use: true
         params:
-          alpha: 0.0
-          beta: 1000.0
+          alpha: 1.0
+          beta: 100.0
           nsamples: 200
       PhotometryMSE:
-        use: true
+        use: false
         params: {}
       ColorMSE:
-        use: false
+        use: true
         params:
           ref_idx: 3
       SlopeLoss:
@@ -65,10 +65,10 @@ lgsm:
         use: true
         params:
           frac: 0.01
-          eta: 100.0
+          eta: 10.0
     optimizer:
       adam:
-        learning_rate: 0.001
+        learning_rate: 0.002
     batch_size: 128
     epochs: 300
     validation_split: 0.2
@@ -116,3 +116,5 @@ plotting:
         edgecolors: k
         alpha: 0.75
         zorder: 10
+  latent_variables:
+    format: png

@@ -53,10 +53,16 @@ PRNGKey = random.PRNGKey(config["galaxy_seed"])
 train_key, val_key = random.split(PRNGKey)
 
 ntrain = nrows * ncols_train
-train_idx = random.randint(train_key, shape=(ntrain,), minval=0, maxval=idx_split)
+train_idx = random.choice(
+    train_key, jnp.arange(0, idx_split), shape=(ntrain,), replace=False
+)
+# train_idx = random.randint(train_key, shape=(ntrain,), minval=0, maxval=idx_split)
 
 nval = nrows * ncols_val
-val_idx = random.randint(val_key, shape=(nval,), minval=idx_split, maxval=redshift.size)
+val_idx = random.choice(
+    val_key, jnp.arange(idx_split, redshift.size), shape=(nval,), replace=False
+)
+# val_idx = random.randint(val_key, shape=(nval,), minval=idx_split, maxval=redshift.size)
 
 # concatenate the sets
 idx = jnp.concatenate((train_idx, val_idx))

@@ -7,10 +7,12 @@ I talked with Kyle and realized I hadn't included the KLDivergence in my loss fu
 - [x] Train with ColorMSE
 - [ ] Add errors to simulations and fix loss functions so that errors aren't hard-coded
 - [x] Implement spectral loss function
-- [ ] Make plots of latent variables
-- [ ] Move over to InfoVAE (also [read the paper](https://arxiv.org/pdf/1706.02262.pdf))
-    ^ Maybe use params similar to what Stephen used in his paper
+- [x] Make plots of latent variables
+- [x] Implement InfoVAE (also [read the paper](https://arxiv.org/pdf/1706.02262.pdf))
 - [ ] Do a hyperparameter search, including number of latent dimensions
+
+I was thinking about why the spectral regularization doesn't seems to be working as well as I had expected.
+I think part of the problem may be that I'm comparing to an interpolated version of the spectra, which may erase sharp features that have big contributions to the photometry, but are discouraged from forming during the training with specral regularization...
 
 
 ## Week of Oct 4

@@ -129,10 +129,10 @@ dmypy.json
 .pyre/
 
 # vscode settings
-.vscode/
+.vscode
 
 # snakemake hidden folder
-.snakemake/
+.snakemake
 
 # ignore my trash directory
-.all_trash/
+.all_trash

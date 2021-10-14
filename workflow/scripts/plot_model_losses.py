@@ -22,6 +22,10 @@ assert (
     subplot_settings["nrows"] * subplot_settings["ncols"] >= nplots
 ), "Not enough rows and columns to plot the losses."
 
+# if figsize not provided, set default
+if "figsize" not in subplot_settings:
+    subplot_settings["figsize"] = [4, 2 * nplots]
+
 # set up the subplots
 fig, axes = plt.subplots(**subplot_settings)
 

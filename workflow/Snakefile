@@ -14,12 +14,13 @@ results_dir = f"results/{config['run_name']}"
 training_data = "data/processed/simulated_photometry.pkl"
 model_losses = f"{results_dir}/model_losses.{config['plotting']['model_losses']['format']}"
 model_predictions = f"{results_dir}/model_predictions.{config['plotting']['model_predictions']['format']}"
+latent_variables = f"{results_dir}/latent_variables.{config['plotting']['latent_variables']['format']}"
 
 
 # set path to the full config to be checked against and then saved
 full_config = f"{results_dir}/full_config.yaml"
 # set up the config flags
-config_flags = ConfigFlags(config, full_config, default_config)
+config_flags = ConfigFlags(config, full_config)
 
 # save the current config
 onstart:
@@ -32,6 +33,7 @@ rule all:
         model_dir,
         model_losses,
         model_predictions,
+        latent_variables
 
 
 rule simulate_photometry:
@@ -74,10 +76,12 @@ rule plot_model_predictions:
     script:
         "scripts/plot_model_predictions.py"
 
-
-# cleanup the config flags if exiting with error
-onerror:
-    config_flags.cleanup()
-# cleanup the config flags if exiting with success
-onsuccess:
-    config_flags.cleanup()
+rule plot_latent_variables:
+    input:
+        config_flags.flag("plotting", "latent_variables"),
+        model_dir,
+        training_data,
+    output:
+        latent_variables,
+    script:
+        "scripts/plot_latent_variables.py"

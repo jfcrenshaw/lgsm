@@ -5,8 +5,6 @@ lgsm:
 
   training:
     losses:
-      PhotometryMSE:
-        use: True # bool
       SpectralLoss:
         use: True # bool
         params:

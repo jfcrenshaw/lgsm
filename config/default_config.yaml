@@ -53,7 +53,13 @@ lgsm:
       KLDiv:
         use: True # bool
         params:
-          beta: 1. # float
+          alpha: 0. # float
+      MMD:
+        use: False # bool
+        params:
+          alpha: 0. # float
+          beta: 1.e+3 # float, lambda from the InfoVAE paper
+          nsamples: 200 # int
       PhotometryMSE:
         use: True # bool
         params: {} # empty dict because no parameters
@@ -69,11 +75,11 @@ lgsm:
         use: False # bool
         params:
           frac: 0.01 # float
-          eta: 1.e-1 # float
+          eta: 1.e+2 # float
 
     optimizer:
       adam:
-        learning_rate: 1.e-3 # float
+        learning_rate: 2.e-3 # float
 
     batch_size: 128 # int
     epochs: 300 # int
@@ -86,7 +92,6 @@ plotting:
   model_losses:
     format: png # str, e.g. png, pdf, svg, etc.
     subplots_settings: # dictionary passed to plt.subplots()
-      figsize: [4, 7] # list
       constrained_layout: True # bool
       dpi: 120 # int
     plot_settings: # dictionary passed to ax.set()
@@ -130,3 +135,7 @@ plotting:
         edgecolors: k # str
         alpha: 0.75 # str
         zorder: 10 # int
+
+  latent_variables:
+    format: png # str, e.g. png, pdf, svg, etc.
+    test: False
