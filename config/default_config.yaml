@@ -140,5 +140,5 @@ plotting:
         zorder: 10 # int
 
   latent_variables:
-    format: png # str, e.g. png, pdf, svg, etc.
-    test: False
+    format: pdf # must be pdf for now!
+    npoints: 1000 # int

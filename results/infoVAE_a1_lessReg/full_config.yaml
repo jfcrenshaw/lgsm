@@ -119,5 +119,5 @@ plotting:
         alpha: 0.75
         zorder: 10
   latent_variables:
-    format: png
-    test: false
+    format: pdf
+    npoints: 1000
