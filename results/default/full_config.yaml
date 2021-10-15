@@ -6,23 +6,24 @@ sims:
   max_redshift: 2.0
   min_mag: 18.0
   max_mag: 22.0
+  photometric_err: 0.0
   bandpasses:
-    - lsstu
-    - lsstg
-    - lsstr
-    - lssti
-    - lsstz
-    - lssty
+  - lsstu
+  - lsstg
+  - lsstr
+  - lssti
+  - lsstz
+  - lssty
 lgsm:
   model_name: default_model
   vae:
     encoder_layers:
-      - 32
+    - 32
     intrinsic_latent_size: 3
     decoder_layers:
-      - 8
-      - 16
-      - 32
+    - 8
+    - 16
+    - 32
     wave_bins: 64
     wave_min: 1000.0
     wave_max: 11000.0
@@ -31,19 +32,25 @@ lgsm:
     batch_norm: true
   physics_layer:
     bandpasses:
-      - lsstu
-      - lsstg
-      - lsstr
-      - lssti
-      - lsstz
-      - lssty
+    - lsstu
+    - lsstg
+    - lsstr
+    - lssti
+    - lsstz
+    - lssty
     band_oversampling: 201
   training:
     losses:
       KLDiv:
         use: true
         params:
-          beta: 1.
+          alpha: 0.0
+      MMD:
+        use: false
+        params:
+          alpha: 0.0
+          beta: 1000.0
+          nsamples: 200
       PhotometryMSE:
         use: true
         params: {}
@@ -59,20 +66,18 @@ lgsm:
         use: false
         params:
           frac: 0.01
-          eta: 1.e-1
+          eta: 100.0
     optimizer:
       adam:
-        learning_rate: 0.001
+        learning_rate: 0.002
     batch_size: 128
     epochs: 300
     validation_split: 0.2
 plotting:
+  rcParams: {}
   model_losses:
     format: png
     subplots_settings:
-      figsize:
-        - 4
-        - 7
       constrained_layout: true
       dpi: 120
     plot_settings:
@@ -88,8 +93,8 @@ plotting:
     subplots_settings:
       nrows: 5
       figsize:
-        - 10
-        - 12
+      - 10
+      - 12
       constrained_layout: true
       dpi: 120
     ax_settings:
@@ -98,6 +103,7 @@ plotting:
     predicted:
       sed_settings:
         c: C1
+        alpha: 0.25
       photometry_settings:
         facecolors: C1
         edgecolors: k
@@ -105,10 +111,13 @@ plotting:
     truth:
       sed_settings:
         c: C0
-        lw: 0.5
+        lw: 1
         alpha: 0.75
       photometry_settings:
         facecolors: C0
         edgecolors: k
         alpha: 0.75
         zorder: 10
+  latent_variables:
+    format: pdf
+    npoints: 1000
