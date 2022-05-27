@@ -19,12 +19,15 @@ lgsm:
   vae:
     encoder_layers:
     - 32
-    intrinsic_latent_size: 3
-    decoder_layers:
-    - 8
     - 16
-    - 32
-    wave_bins: 64
+    - 8
+    - 4
+    intrinsic_latent_size: 2
+    decoder_layers:
+    - 40
+    - 80
+    - 160
+    wave_bins: 300
     wave_min: 1000.0
     wave_max: 11000.0
     normalize_at: 4000.0

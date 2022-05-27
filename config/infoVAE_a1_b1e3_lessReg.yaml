@@ -1,0 +1,20 @@
+run_name: infoVAE_a1_b1e3_lessReg
+
+lgsm:
+  model_name: infoVAE_a1_b1e3_lessReg_model
+
+  training:
+    losses:
+      KLDiv:
+        use: False # bool
+      MMD:
+        use: True # bool
+        params:
+          alpha: 1. # float
+          beta: 1.e+3 # float, lambda from the InfoVAE paper
+          nsamples: 200 # int
+      SpectralLoss:
+        use: True # bool
+        params:
+          frac: 0.01 # float
+          eta: 1.e+1 # float

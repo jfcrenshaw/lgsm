@@ -53,7 +53,7 @@ class MMD(elegy.Loss):
         train_latent_samples = y_pred["intrinsic_latents"]
 
         # generate latent samples from the true latent distribution
-        PRNGKey = random.PRNGKey(train_latent_samples[0, 0].astype(int))
+        PRNGKey = random.PRNGKey(np.random.random_integers(0, 1000000))
         true_latent_samples = random.normal(
             PRNGKey, shape=[self.nsamples, train_latent_samples.shape[1]]
         )
@@ -88,33 +88,20 @@ class ColorMSE(elegy.Loss):
     an error of 0.05 mags for all photometry.
     """
 
-    def __init__(self, ref_idx: int):
+    def __init__(self):
         super().__init__()
-        self.ref_idx = ref_idx  # index of the reference band
 
     def call(self, x: np.ndarray, y_pred: dict) -> np.ndarray:
-        mag_SE = (
-            1
-            / 0.05 ** 2
-            * (
-                x[..., self.ref_idx + 1]
-                - y_pred["predicted_photometry"][..., self.ref_idx]
-            )
-            ** 2
-        )
 
-        color_SE = (
-            1
+        return (
+            0.5
             / (2 * 0.05 ** 2)
             * (
                 jnp.diff(x[:, 1:], axis=-1)
                 - jnp.diff(y_pred["predicted_photometry"], axis=-1)
             )
             ** 2
-        ).sum(axis=-1)
-
-        MSE = mag_SE + color_SE / y_pred["predicted_photometry"].shape[-1]
-        return 0.5 * MSE
+        ).mean(axis=-1)
 
 
 class SlopeLoss(elegy.Loss):

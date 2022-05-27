@@ -60,17 +60,23 @@ class Encoder(elegy.Module):
         # calculate the intrinsic latent variables, which are drawn from
         # a normal distribution
         mean = elegy.nn.Linear(self.intrinsic_latent_size, name="linear_mean")(inputs)
-        log_var = elegy.nn.Linear(self.intrinsic_latent_size, name="linear_std")(
-            inputs
-        )
+        log_var = elegy.nn.Linear(self.intrinsic_latent_size, name="linear_std")(inputs)
         stds = jnp.exp(log_var / 2)
         intrinsic_latents = mean + stds * jax.random.normal(self.next_key(), mean.shape)
 
         # calculate the extrinsic latent variables (not including the redshift,
         # which was pulled out of the inputs above)
-        extrinsic_latents = elegy.nn.Linear(
-            self.extrinsic_latent_size, name="linear_extrinsic"
+        extrinsic_mean = elegy.nn.Linear(
+            self.extrinsic_latent_size, name="linear_extrinsic_mean"
         )(inputs)
+        extrinsic_log_var = elegy.nn.Linear(
+            self.extrinsic_latent_size, name="linear_extrinsic_log_var"
+        )(inputs)
+        extrinsic_stds = jnp.exp(extrinsic_log_var / 2)
+
+        extrinsic_latents = extrinsic_mean + extrinsic_stds * jax.random.normal(
+            self.next_key(), extrinsic_mean.shape
+        )
 
         # decide which column is which
         # (note: right now this is useless as there is only one...)
@@ -80,6 +86,8 @@ class Encoder(elegy.Module):
             "latent_mean": mean,
             "latent_std": stds,
             "intrinsic_latents": intrinsic_latents,
+            "extrinsic_mean": extrinsic_mean,
+            "extrinsic_stds": extrinsic_stds,
             "amplitude": amplitude,
             "redshift": redshift,
         }

@@ -29,10 +29,10 @@ lgsm:
   model_name: default_model # str
 
   vae:
-    encoder_layers: [32] # Sequence[int]
-    intrinsic_latent_size: 3 # int
-    decoder_layers: [8, 16, 32] # Sequence[int]
-    wave_bins: 64 # int
+    encoder_layers: [32, 16, 8, 4] # Sequence[int]
+    intrinsic_latent_size: 2 # int
+    decoder_layers: [40, 80, 160] # Sequence[int]
+    wave_bins: 300 # int
     wave_min: 1.e+3 # float
     wave_max: 11.e+3 # float
     normalize_at: 4.e+3 # float
@@ -66,8 +66,7 @@ lgsm:
         params: {} # empty dict because no parameters
       ColorMSE:
         use: False # bool
-        params:
-          ref_idx: 3 # int
+        params: {} # empty dict because no parameters
       SlopeLoss:
         use: False # bool
         params:

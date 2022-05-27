@@ -1,0 +1,126 @@
+run_name: infoVAE_a1_b1e3_lessReg
+sims:
+  random_seed: 0
+  redshifts_per_sed: 100
+  min_redshift: 0.01
+  max_redshift: 2.0
+  min_mag: 18.0
+  max_mag: 22.0
+  photometric_err: 0.0
+  bandpasses:
+  - lsstu
+  - lsstg
+  - lsstr
+  - lssti
+  - lsstz
+  - lssty
+lgsm:
+  model_name: infoVAE_a1_b1e3_lessReg_model
+  vae:
+    encoder_layers:
+    - 32
+    - 16
+    - 8
+    - 4
+    intrinsic_latent_size: 2
+    decoder_layers:
+    - 40
+    - 80
+    - 160
+    wave_bins: 300
+    wave_min: 1000.0
+    wave_max: 11000.0
+    normalize_at: 4000.0
+    sed_unit: mag
+    batch_norm: true
+  physics_layer:
+    bandpasses:
+    - lsstu
+    - lsstg
+    - lsstr
+    - lssti
+    - lsstz
+    - lssty
+    band_oversampling: 201
+  training:
+    losses:
+      KLDiv:
+        use: false
+        params:
+          alpha: 0.0
+      MMD:
+        use: true
+        params:
+          alpha: 1.0
+          beta: 1000.0
+          nsamples: 200
+      PhotometryMSE:
+        use: true
+        params: {}
+      ColorMSE:
+        use: false
+        params:
+          ref_idx: 3
+      SlopeLoss:
+        use: false
+        params:
+          eta: 0.01
+      SpectralLoss:
+        use: true
+        params:
+          frac: 0.01
+          eta: 10.0
+    optimizer:
+      adam:
+        learning_rate: 0.002
+    batch_size: 128
+    epochs: 300
+    validation_split: 0.2
+plotting:
+  rcParams: {}
+  model_losses:
+    format: png
+    subplots_settings:
+      constrained_layout: true
+      dpi: 120
+    plot_settings:
+      yscale: log
+  model_predictions:
+    format: png
+    plot_unit: mag
+    ncols_train: 2
+    ncols_val: 2
+    galaxy_seed: 0
+    nsamples: 10
+    encoder_seed: 0
+    subplots_settings:
+      nrows: 5
+      figsize:
+      - 10
+      - 12
+      constrained_layout: true
+      dpi: 120
+    ax_settings:
+      xlabel: Wavelength (AA)
+      ylabel: AB Magnitude
+    predicted:
+      sed_settings:
+        c: C1
+        alpha: 0.25
+      photometry_settings:
+        facecolors: C1
+        edgecolors: k
+        zorder: 10
+    truth:
+      sed_settings:
+        c: C0
+        lw: 1
+        alpha: 0.75
+      photometry_settings:
+        facecolors: C0
+        edgecolors: k
+        alpha: 0.75
+        zorder: 10
+  latent_variables:
+    format: pdf
+    npoints: 1000

@@ -100,6 +100,10 @@ predictions = model.predict(data[["redshift"] + bandpasses].to_numpy())
 # save the latents
 latents = [f"s{i}" for i in range(predictions["latent_mean"].shape[1])]
 data[latents] = predictions["latent_mean"]
+latent_stds = [f"{s}_std" for s in latents]
+data[latent_stds] = predictions["latent_std"]
+data["amplitude"] = predictions["extrinsic_mean"]
+data["amplitude_std"] = predictions["extrinsic_stds"]
 
 # and the MSE
 data["mse"] = np.mean(
@@ -127,7 +131,7 @@ pg = sns.pairplot(
     hue="set",
     markers=".",
     corner=True,
-    vars=["s0", "s1", "s2"],
+    vars=latents,
 )
 
 handles = pg._legend_data.values()
@@ -160,7 +164,7 @@ if lgsm_config["training"]["losses"]["SpectralLoss"]["use"]:
         hue_order=[True, False],
         markers=".",
         corner=True,
-        vars=["s0", "s1", "s2"],
+        vars=latents,
     )
 
     handles = pg._legend_data.values()
@@ -194,8 +198,8 @@ def pairplot_latents(hue_var, query="(spectrum == False) & (mse < 10)"):
         hue=hue_var,
         markers=".",
         palette=cmap,
-        x_vars=["s0", "s1"],
-        y_vars=["s1", "s2"],
+        x_vars=latents[:-1],
+        y_vars=latents[1:],
         diag_kind=None,
     )
 
@@ -206,10 +210,10 @@ def pairplot_latents(hue_var, query="(spectrum == False) & (mse < 10)"):
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
     sm.set_array([])
 
-    pg.axes[0, 1].remove()
+    # pg.axes[0, -1].remove()
 
     axins = inset_axes(
-        pg.axes[1, 1], width="90%", height="20%", loc="upper center", borderpad=-10
+        pg.axes[-1, -1], width="90%", height="20%", loc="upper center", borderpad=-10
     )
     pg.fig.colorbar(sm, cax=axins, label=hue_var, orientation="horizontal")
 
@@ -235,7 +239,9 @@ hue_vars = [
     "restframe_r-i",
     "restframe_i-z",
     "restframe_z-y",
-]
+    "amplitude",
+    "amplitude_std",
+] + latent_stds
 
 for var in hue_vars:
     figures.append(pairplot_latents(var))

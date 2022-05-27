@@ -41,7 +41,6 @@ rule all:
 
 rule simulate_photometry:
     input:
-        config_flagger.flag("sims"),
         "data/raw/simulated_seds.pkl",
     output:
         "data/processed/simulated_photometry.pkl",
